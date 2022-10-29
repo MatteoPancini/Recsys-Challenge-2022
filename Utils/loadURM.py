@@ -1,14 +1,20 @@
 # Utility class to load URM dataset and crop into a CSR sparse matrix format
 
 def load_URM(URM_path):
+
     import pandas as pd
     import scipy.sparse as sps
 
     dataset = pd.read_csv(URM_path)
 
-    user_list = dataset['UserID'].tolist()
-    item_list = dataset['ItemID'].tolist()
-    # impressions_list = dataset['Impressions'].tolist()
-    data_list = dataset['Data'].tolist()
+    dataset = dataset.drop(dataset[dataset.Data != 0].index, inplace=True)
 
-    return sps.coo_matrix((data_list, (user_list, item_list))).tocsr()
+    dataset['Data'].replace(0, 1)
+
+    #userID_unique = dataset["UserID"].unique()
+    #itemID_unique = dataset["ItemID"].unique()
+
+    URM = sps.coo_matrix((dataset["Data"].values,
+                          (dataset["UserID"].values, dataset["ItemID"].values)))
+
+    return URM.tocsr()
