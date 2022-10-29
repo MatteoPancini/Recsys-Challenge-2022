@@ -2,7 +2,7 @@
 IMPORTANT: All files are comma-separated (columns are separated with ',' ). 
 Also the submission file must be comma-separated.
 
-## Interactions and Impressions
+## URM: Interactions and Impressions
 interactions_and_impressions.csv : Contains the training set, describing implicit preferences expressed by the users.
 + user_id : identifier of the user
 + item_id : identifier of the item (TV series)
@@ -20,8 +20,8 @@ Contains the number of episodes of the items. TV series may have multiple episod
 
 ## Data ICM Type
 data_ICM_type.csv: 
-Contains the type of the items. An item can only have one type.
-All types are anonymized and described only by a numerical identifier.
+Contains the type of the items. An item can only have one type (a type is for example the genre of the TV Series).
+All types are anonymized and described only by a numerical identifier (from 1 to 4).
 + item_id : identifier of the item
 + feature_id : identifier of the type
 + data : "1" if the item is described by the type
