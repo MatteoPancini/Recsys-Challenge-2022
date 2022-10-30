@@ -1,4 +1,5 @@
 # Utility class to load URM dataset and crop into a CSR sparse matrix format
+#TODO: eliminare una volta fatto creato createURM.py
 
 def load_URM(URM_path):
 
