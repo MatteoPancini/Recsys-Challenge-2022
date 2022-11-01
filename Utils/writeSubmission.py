@@ -1,6 +1,6 @@
 # Utility method to automatically write in the right format the submission file
 
-def write_submission(recommender, urm_train, target_users_path, out_path):
+def write_submission(recommender, target_users_path, out_path):
     import pandas as pd
     import csv
     import numpy as np
@@ -16,4 +16,4 @@ def write_submission(recommender, urm_train, target_users_path, out_path):
         writer.writerow(['user_id', 'item_list'])
 
         for userID in targetUsers:
-            writer.writerow([userID, str(np.array(recommender.recommend(userID, urm_train, at=10)))[1:-1]])
+            writer.writerow([userID, str(np.array(recommender.recommend(userID, 10)))[1:-1]])
