@@ -3,7 +3,7 @@ import pandas as pd
 import scipy.sparse as sp
 def createURM():
 
-    dataset = pd.read_csv('Input/interactions_and_impressions.csv')
+    dataset = pd.read_csv('../Input/interactions_and_impressions.csv')
     dataset = dataset.drop(columns=['Impressions'])
 
     datasetCOO = sp.coo_matrix((dataset["Data"].values, (dataset["UserID"].values, dataset["ItemID"].values)))
