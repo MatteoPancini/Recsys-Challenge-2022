@@ -16,4 +16,5 @@ def createURM():
             URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(1)
 
     URM = sp.csr_matrix(URM)
+
     return URM

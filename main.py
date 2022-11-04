@@ -1,7 +1,7 @@
 # TODO: CREARE cartella 'main' con tutti i file main degli algoritmi fatti
 
 if __name__ == '__main__':
-    from Utils.createURM import createURM
+    from Utils.createICM import createICM
 
-    URM = createURM()
-    print(URM)
+    ICM = createICM()
+    print(ICM)
