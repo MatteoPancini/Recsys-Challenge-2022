@@ -7,8 +7,9 @@ if __name__ == '__main__':
     URM = createURM()
 
     recommender = ItemKNNCFRecommender(URM)
-    # BEST recommender.fit(shrink = 10, topk = 25)
-    recommender.fit(shrink = int(11.360087017080575), topK = int(24.286589663434658))
+    # BEST recommender.fit(shrink = int(11.360087017080575), topK = int(24.286589663434658))
+
+    recommender.fit(shrink = int(24.222108288044993), topK = int(51.671247960899215))
 
     write_submission(recommender=recommender,
                      target_users_path="../Input/data_target_users_test.csv",
