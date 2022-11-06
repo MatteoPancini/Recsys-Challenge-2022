@@ -5,8 +5,6 @@
 @author: Maurizio Ferrari Dacrema
 """
 
-from Recommenders.Similarity.Compute_Similarity_Python import Incremental_Similarity_Builder
-
 import numpy as np
 import scipy.sparse as sps
 import time
@@ -65,6 +63,7 @@ def similarityMatrixTopK(item_weights, k=100, verbose = False, use_absolute_valu
     :param inplace: Default True, WARNING matrix will be modified
     :return:
     """
+    from Recommenders.Similarity.Compute_Similarity_Python import Incremental_Similarity_Builder
 
     assert (item_weights.shape[0] == item_weights.shape[1]), "selectTopK: ItemWeights is not a square matrix"
 

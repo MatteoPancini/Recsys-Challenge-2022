@@ -17,8 +17,9 @@ from tqdm import tqdm
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 
-# os.environ["PYTHONWARNINGS"] = ('ignore::exceptions.ConvergenceWarning:sklearn.linear_model')
-# os.environ["PYTHONWARNINGS"] = ('ignore:Objective did not converge:ConvergenceWarning:')
+
+#os.environ["PYTHONWARNINGS"] = ('ignore::exceptions.ConvergenceWarning:sklearn.linear_model')
+#os.environ["PYTHONWARNINGS"] = ('ignore:Objective did not converge:ConvergenceWarning:')
 
 class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
     """
