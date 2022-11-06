@@ -15,7 +15,6 @@ from Recommenders.IR_feature_weighting import okapi_BM_25, TF_IDF
 
 from Recommenders.Similarity.Compute_Similarity import Compute_Similarity
 
-from CythonCompiler.run_compile_subprocess import run_compile_subprocess
 import time, sys
 import numpy as np
 from Recommenders.DataIO import DataIO

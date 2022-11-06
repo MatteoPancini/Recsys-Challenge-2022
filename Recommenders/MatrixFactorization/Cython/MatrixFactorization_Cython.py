@@ -10,8 +10,8 @@ import sys
 
 import numpy as np
 
-from ...Base.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
-from ...Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
+from ...BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+from ...Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 from ...CythonCompiler.run_compile_subprocess import run_compile_subprocess
 
 
