@@ -3,13 +3,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-    from Utils.createURM import createURMFormDataset
+    from Utils.createURM import tryURM
     import json
     import numpy as np
     from sklearn.model_selection import ParameterSampler
 
     dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
-    URM = createURMFormDataset(dataset)
+    URM = tryURM(dataset)
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
     URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
@@ -20,12 +20,12 @@ if __name__ == '__main__':
     recommender = ItemKNNCFRecommender(URM_train)
 
     grid_size = 100
-    TUNE_ITER = 1
-    num_epochs = 1
+    TUNE_ITER = 60
+    num_epochs = 5
     worse_score = 0
 
-    init_param_grid = {'topK': [i for i in range(10, 500)],
-                       'shrink': [i for i in range(10, 100)],
+    init_param_grid = {'topK': [i for i in range(100, 400)],
+                       'shrink': [i for i in np.arange(10, 100)],
                        }
 
     new_param_grid = init_param_grid.copy()
