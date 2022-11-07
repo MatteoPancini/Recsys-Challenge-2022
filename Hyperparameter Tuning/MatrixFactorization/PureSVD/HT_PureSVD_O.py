@@ -1,16 +1,17 @@
-
 if __name__ == '__main__':
 
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDItemRecommender
-    from Utils.createURM import createURM
+    from Utils.createURM import createURMFormDataset
     import json
     import optuna as op
+    import pandas as pd
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
+    URM = createURMFormDataset(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -27,7 +28,7 @@ if __name__ == '__main__':
 
 
     def objective(trial):
-        num_factors = trial.suggest_float("num_factors", 10, 800)
+        num_factors = trial.suggest_float("num_factors", 10, 100)
         topK = trial.suggest_float("topK", 300, 400)
         recommender.fit(num_factors=int(num_factors), topK=int(topK))
         result_dict, _ = evaluator_validation.evaluateRecommender(recommender)
@@ -35,7 +36,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=3)
+    study.optimize(objective, n_trials=10)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log

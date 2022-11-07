@@ -5,12 +5,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import createURM
+    from Utils.createURM import createURMFormDataset
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
+    URM = createURMFormDataset(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -24,13 +25,14 @@ if __name__ == '__main__':
     # Coarse-to-fine hyperparameter model
 
     grid_size = 100
-    TUNE_ITER = 2
-    num_epochs = 10
+    TUNE_ITER = 10
+    num_epochs = 5
     worse_score = 0
 
     # Hyperparameter tuning interval
-    init_param_grid = {'l1_ratio': [i for i in range(0, 1)],
-                       'topK': [i for i in range(100, 500)],
+    init_param_grid = {'l1_ratio': [i for i in np.arange(0.000001, 0.1)],
+                       'topK': [i for i in range(300, 400)],
+                       'alfa' : [i for i in np.arange(0.00001, 0.1)]
                        }
 
     new_param_grid = init_param_grid.copy()

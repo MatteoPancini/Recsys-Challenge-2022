@@ -1,18 +1,17 @@
 if __name__ == '__main__':
-    import numpy as np
-    import pandas as pd
-    from sklearn.model_selection import ParameterSampler
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import createURM
+    from Utils.createURM import createURMFormDataset
     import optuna as op
     from optuna.samplers import TPESampler
     import json
+    import pandas as pd
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
+    URM = createURMFormDataset(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -43,7 +42,7 @@ if __name__ == '__main__':
     study = op.create_study(direction='maximize', pruner=op.pruners.MedianPruner(
         n_startup_trials=2, n_warmup_steps=5, interval_steps=3
     ), sampler=TPESampler())
-    study.optimize(objective, n_trials=5)
+    study.optimize(objective, n_trials=20)
 
 
     # ---------------------------------------------------------------------------------------------------------

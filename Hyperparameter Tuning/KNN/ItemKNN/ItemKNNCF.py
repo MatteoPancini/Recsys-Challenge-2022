@@ -3,12 +3,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-    from Utils.createURM import createURM
+    from Utils.createURM import createURMFormDataset
     import json
     import numpy as np
     from sklearn.model_selection import ParameterSampler
 
-    URM = createURM()
+    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
+    URM = createURMFormDataset(dataset)
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
     URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     recommender = ItemKNNCFRecommender(URM_train)
 
     grid_size = 100
-    TUNE_ITER = 2
+    TUNE_ITER = 1
     num_epochs = 1
     worse_score = 0
 
@@ -69,7 +70,6 @@ if __name__ == '__main__':
             df_rs_results = df_rs_results.append(new_row_dict, ignore_index=True)
             df_rs_results = df_rs_results.sort_values(['score'], ascending=False).head(num_epochs - epoch)
 
-        display(df_rs_results)
         print(df_rs_results.head(1).T.to_dict())
 
         # Get the worse and best hyperparameter combinations
@@ -96,5 +96,6 @@ if __name__ == '__main__':
     recommender.fit(shrink=shrink, topK=topK)
     result_df, _ = evaluator_test.evaluateRecommender(recommender)
 
+    resultToSave = 'MAP = ' + str(best_params_dict['score']) + '    topK = ' + str(best_params_dict['params'][0]) + '   shrink = ' + str(best_params_dict['params'][1])
     with open("logs/" + recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
-        json.dump(best_params_dict, json_file)
+        json.dump(resultToSave,json_file, indent=4)
