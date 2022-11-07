@@ -43,7 +43,7 @@ class K_Fold_Evaluator_MAP(Evaluator):
             )
 
             results.append(
-                result_dict[10]["MAP"]
+                result_dict.iloc[0]['MAP']
             )
 
         return results
