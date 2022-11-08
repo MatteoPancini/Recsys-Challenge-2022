@@ -7,10 +7,8 @@ if __name__ == '__main__':
     import os
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     from Utils.createURM import createBumpURM
-    from Data_manager.split_functions.split_train_validation_random_holdout import \
-        split_train_in_two_percentage_global_sample
-    #from Recommenders.MatrixFactorization.IALS_implicit_Recommender import IALSRecommender_implicit
-    from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
+    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
+    from Recommenders.MatrixFactorization.IALS_implicit_Recommender import IALSRecommender_implicit
 
     import optuna as op
     import json
@@ -18,7 +16,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('/Users/matteopancini/PycharmProjects/recsys-challenge-2022-Pancini-Vitali/Input/interactions_and_impressions.csv')
+    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
     URM = createBumpURM(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -46,7 +44,6 @@ if __name__ == '__main__':
     #        IALSRecommender_implicit(URM_train=URM_train_list[index])
     #    )
 
-
     def objective(trial):
 
         #recommenders = []
@@ -55,15 +52,15 @@ if __name__ == '__main__':
         
         n_factors = trial.suggest_int("n_factors", 300, 400)
         regularization = trial.suggest_float("regularization", 1e-6, 1e-1)
-        alpha_val = trial.suggest_float("alpha_val", 10, 50)
+        alpha = trial.suggest_int("alpha", 10, 50)
         iterations = trial.suggest_int("iterations", 1, 100)
         
         for index in range(len(URM_train_list)):
 
-            recommender_IALS = IALSRecommender(URM_train_list[index], verbose=False)
+            recommender_IALS = IALSRecommender_implicit(URM_train=URM_train_list[index])
 
             #recommender_IALS.fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val, iterations=3)
-            recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=3)
+            recommender_IALS.fit(n_factors=n_factors, regularization=0.01, alpha_val=alpha)
 
             #recommenders.append(IALSRecommender_implicit(URM_train_list[index], verbose=False))
 
@@ -73,14 +70,14 @@ if __name__ == '__main__':
             #recommenders[index].URM_train = URM_train_list[index]  # utile in caso di combine
             print("starting evaluation...")
 
-            evaluator_validation = EvaluatorHoldout(URM_validation_list[index], cutoff_list=[10])
+            evaluator_validation = EvaluatorHoldout(URM_test_list=URM_validation_list[index], cutoff_list=[10])
             
             result_dict, _ = evaluator_validation.evaluateRecommender(recommender_IALS)
             
             MAP_List_Fold.append(result_dict.iloc[0]["MAP"])
             
 
-        print("starting evaluation...")
+        #print("starting evaluation...")
         #result = evaluator_validation.evaluateRecommender(recommenders)
         #print(result)
 
@@ -90,7 +87,6 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
-
     study.optimize(objective, n_trials=3)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -103,10 +99,10 @@ if __name__ == '__main__':
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
 
-    recommender_IALS = IALSRecommender(URM_train, verbose=False)
+    recommender_IALS = IALSRecommender_implicit(URM_train, verbose=False)
     #recommenders.append(IALSRecommender_implicit(URM_train_list[0], verbose=False))
 
-    recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=3)
+    recommender_IALS.fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val, iterations=3)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)
