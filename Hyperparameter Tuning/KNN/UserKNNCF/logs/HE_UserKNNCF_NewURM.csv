@@ -1,0 +1,7 @@
+rec_name,topK,shrink,similarity,feature_weighting,MAP
+['UserKNNCFRecommender', 100, 10, 'tanimoto', 'none', 0.015298156952884825]
+['UserKNNCFRecommender', 100, 10, 'tanimoto', 'BM25', 0.007794533016596144]
+['UserKNNCFRecommender', 100, 10, 'tanimoto', 'TF-IDF', 0.015472088401887898]
+['UserKNNCFRecommender', 100, 10, 'cosine', 'none', 0.014688973165573101]
+['UserKNNCFRecommender', 100, 10, 'cosine', 'BM25', 0.005327726679207105]
+['UserKNNCFRecommender', 100, 10, 'cosine', 'TF-IDF', 0.014895612364571383]

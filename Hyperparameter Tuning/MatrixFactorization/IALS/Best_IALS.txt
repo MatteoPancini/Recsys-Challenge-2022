@@ -1,0 +1,19 @@
+APPiccio = {
+    "n_factors": 300,
+    "reg": 0.15,
+    "iterations": 30
+}
+
+FedericaBucchieri = {
+    n_factors=int(469.47983415825166),
+    regularization=5.550461180441473e-06,
+    iterations=int(39.2008537931411)
+    alpha_val=42.991885722226804
+}
+
+AlexDruso = {
+    factors=int(398.601583855084),
+    regularization=0.01,
+    iterations=int(94.22855449116447),
+    alpha=42.07374324671451,
+}
