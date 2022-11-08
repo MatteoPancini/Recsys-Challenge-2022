@@ -1,7 +1,7 @@
 if __name__ == '__main__':
 
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
-    from Evaluation.Evaluator import EvaluatorHoldout
+    from joblib import Parallel, delayed
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Utils.createURM import createURM
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     recommenders[0].fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
-    result_dict, _ = evaluator_validation.evaluateRecommender(recommenders[0])
+    result_dict = evaluator_validation.evaluateRecommender(recommenders[0])
 
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)

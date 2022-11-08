@@ -38,7 +38,7 @@ def createURMFormDataset(dataset):
     URM = sp.csr_matrix(URM)
 
     return URM
-def tryURM(dataset):
+def createBumpURM(dataset):
 
     dataset = dataset.drop(columns=['Impressions'])
 

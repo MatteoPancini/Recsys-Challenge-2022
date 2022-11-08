@@ -3,13 +3,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-    from Utils.createURM import tryURM
+    from Utils.createURM import createBumpURM
     import json
     import numpy as np
     from sklearn.model_selection import ParameterSampler
 
     dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
-    URM = tryURM(dataset)
+    URM = createBumpURM(dataset)
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
     URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
