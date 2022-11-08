@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
         MAP_List_Fold = []
         
-        n_factors = trial.suggest_int("n_factors", 300, 400)
+        n_factors = trial.suggest_int("n_factors", 100, 300)
         regularization = trial.suggest_float("regularization", 1e-6, 1e-1)
         alpha_val = trial.suggest_float("alpha_val", 10, 50)
         iterations = trial.suggest_int("iterations", 1, 100)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
             recommender_IALS = IALSRecommender(URM_train_list[index], verbose=False)
 
             #recommender_IALS.fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val, iterations=3)
-            recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=3)
+            recommender_IALS.fit(num_factors=n_factors, reg=0.01, alpha=alpha_val, epochs=3)
 
             #recommenders.append(IALSRecommender_implicit(URM_train_list[index], verbose=False))
 
@@ -90,7 +90,6 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
-
     study.optimize(objective, n_trials=3)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -106,7 +105,7 @@ if __name__ == '__main__':
     recommender_IALS = IALSRecommender(URM_train, verbose=False)
     #recommenders.append(IALSRecommender_implicit(URM_train_list[0], verbose=False))
 
-    recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=3)
+    recommender_IALS.fit(num_factors=n_factors, reg=0.01, alpha=alpha_val, epochs=iterations)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)
