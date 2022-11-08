@@ -5,13 +5,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import createURMFormDataset
+    from Utils.createURM import tryURM
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
     dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
-    URM = createURMFormDataset(dataset)
+    URM = tryURM(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     grid_size = 100
     TUNE_ITER = 10
-    num_epochs = 5
+    num_epochs = 3
     worse_score = 0
 
     # Hyperparameter tuning interval
