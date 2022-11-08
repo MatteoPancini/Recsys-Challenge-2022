@@ -17,3 +17,11 @@ AlexDruso = {
     iterations=int(94.22855449116447),
     alpha=42.07374324671451,
 }
+
+
+Lodigiani = ials.fit(epochs=7, num_factors=200, alpha=25)
+
+    # KAGGLE MAP 0.09674 num_factors=600, alpha=50
+    # KAGGLE MAP 0.09726 num_factors=600, alpha=35
+    # KAGGLE MAP 0.09785 num_factors=600, alpha=25
+    # KAGGLE MAP 0.09877 num_factors=1200, alpha=25
