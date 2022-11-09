@@ -4,14 +4,16 @@ if __name__ == '__main__':
     from joblib import Parallel, delayed
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import createURM
+    from Utils.createURM import createBumpURM
+    import pandas as pd
     import optuna as op
     from optuna.samplers import TPESampler
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
+    URM = createBumpURM(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -58,8 +60,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
-
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=3)
 
 
     # ---------------------------------------------------------------------------------------------------------

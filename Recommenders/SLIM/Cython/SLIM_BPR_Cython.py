@@ -75,8 +75,6 @@ class SLIM_BPR_Cython(BaseItemSimilarityMatrixRecommender, Incremental_Training_
         # Import compiled module
         from Recommenders.SLIM.Cython.SLIM_BPR_Cython_Epoch import SLIM_BPR_Cython_Epoch
 
-
-
         self.symmetric = symmetric
         self.train_with_sparse_weights = train_with_sparse_weights
 

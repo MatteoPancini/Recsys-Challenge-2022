@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
-def createICM():
-    types = pd.read_csv('../Input/data_ICM_type.csv')
+def createICM(lenght, types, URM):
+
     types = types.drop(columns=['data'], axis=1)
     types = types.rename(columns={'feature_id': 'type'})
 
@@ -11,7 +11,6 @@ def createICM():
     typesArray = typesFiltered['type'].to_numpy()
     itemsID = typesFiltered['item_id'].to_numpy()
 
-    URM = pd.read_csv('../Input/interactions_and_impressions.csv')
     itemsURM = URM['ItemID'].to_numpy()
     itemsURM = np.unique(itemsURM, axis=0)
 
@@ -20,7 +19,6 @@ def createICM():
     for x in range(len(itemsID)):
         ICM[itemsID[x]][0] = typesArray[x]
 
-    lenght = pd.read_csv('../Input/data_ICM_length.csv')
     lenght = lenght.drop(columns=['feature_id'], axis=1)
     lenght = lenght.rename(columns={'data': 'numberOfEpisodes'})
 
@@ -35,24 +33,24 @@ def createICM():
 
     return ICM
 
-def newCreateICM():
-    types = pd.read_csv('../Input/data_ICM_type.csv')
+def newCreateICM(lenght, types):
+
     types = types.drop(columns=['data'], axis=1)
     types = types.rename(columns={'feature_id': 'type'})
 
     typesArray = types['type'].to_numpy()
     itemsID = types['item_id'].to_numpy()
 
-    URM = pd.read_csv('../Input/interactions_and_impressions.csv')
-    itemsURM = URM['ItemID'].to_numpy()
-    itemsURM = np.unique(itemsURM, axis=0)
+    #URM = pd.read_csv('../Input/interactions_and_impressions.csv')
+    #itemsURM = URM['ItemID'].to_numpy()
+    #itemsURM = np.unique(itemsURM, axis=0)
 
     ICM = np.zeros((27968, 2), dtype=int)
 
     for x in range(len(itemsID)):
         ICM[itemsID[x]][0] = typesArray[x]
 
-    lenght = pd.read_csv('../Input/data_ICM_length.csv')
+
     lenght = lenght.drop(columns=['feature_id'], axis=1)
     lenght = lenght.rename(columns={'data': 'numberOfEpisodes'})
 

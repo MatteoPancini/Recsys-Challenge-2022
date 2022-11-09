@@ -20,7 +20,7 @@ if __name__ == '__main__':
     recommender = ItemKNNCFRecommender(URM_train)
 
     grid_size = 100
-    TUNE_ITER = 60
+    TUNE_ITER = 50
     num_epochs = 5
     worse_score = 0
 

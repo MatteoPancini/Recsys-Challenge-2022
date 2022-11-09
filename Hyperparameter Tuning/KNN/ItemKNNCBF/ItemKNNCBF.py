@@ -1,38 +1,36 @@
 if __name__ == '__main__':
-    import numpy as np
     import pandas as pd
-    from sklearn.model_selection import ParameterSampler
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import tryURM
+    from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
+    from Utils.createURM import createBumpURM
+    from Utils.createICM import createICM
     import json
+    import numpy as np
+    from sklearn.model_selection import ParameterSampler
 
-    # ---------------------------------------------------------------------------------------------------------
-    # Loading URM
-    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
-    URM = tryURM(dataset)
+    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
+    URM = createBumpURM(dataset)
 
-    # ---------------------------------------------------------------------------------------------------------
-    # Preparing training, validation, test split and evaluator
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage = 0.80)
-    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
+    ICMLenght = pd.read_csv('../../../Input/data_ICM_length.csv')
+    ICMTypes = pd.read_csv('../../../Input/data_ICM_type.csv')
+    ICM = createICM(ICMLenght, ICMTypes, dataset)
+
+    URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
+    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=[10])
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
 
-    # ---------------------------------------------------------------------------------------------------------
-    # Coarse-to-fine hyperparameter model
+    recommender = ItemKNNCBFRecommender(URM_train, ICM)
 
     grid_size = 100
-    TUNE_ITER = 10
-    num_epochs = 3
+    TUNE_ITER = 20
+    num_epochs = 5
     worse_score = 0
 
-    # Hyperparameter tuning interval
-    init_param_grid = {'l1_ratio': [i for i in np.arange(0.000001, 0.1)],
-                       'topK': [i for i in range(300, 400)],
-                       'alfa' : [i for i in np.arange(0.00001, 0.1)]
+    init_param_grid = {'topK': [i for i in range(10, 400)],
+                       'shrink': [i for i in np.arange(10, 100)],
                        }
 
     new_param_grid = init_param_grid.copy()
@@ -50,8 +48,8 @@ if __name__ == '__main__':
             # Get the set of parameter for this iteration
             strategy_params = param_list[tune_iter]
 
-            recommender = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train, verbose=False)
-            recommender.fit(alpha=0.0001, l1_ratio=strategy_params['l1_ratio'], topK=strategy_params['topK'])
+            recommender = ItemKNNCBFRecommender(URM_train, ICM)
+            recommender.fit(shrink=strategy_params['shrink'], topK=strategy_params['topK'])
             results, _ = evaluator_validation.evaluateRecommender(recommender)
             results = results.loc[10]['MAP']
 
@@ -77,7 +75,6 @@ if __name__ == '__main__':
             df_rs_results = df_rs_results.append(new_row_dict, ignore_index=True)
             df_rs_results = df_rs_results.sort_values(['score'], ascending=False).head(num_epochs - epoch)
 
-        # display(df_rs_results)
         print(df_rs_results.head(1).T.to_dict())
 
         # Get the worse and best hyperparameter combinations
@@ -97,10 +94,13 @@ if __name__ == '__main__':
         # Decrease the tuning iteration for random search
         TUNE_ITER = int(TUNE_ITER - epoch * TUNE_ITER / num_epochs)
 
-    # ---------------------------------------------------------------------------------------------------------
-    # Writing hyperparameter into a log
-    resultParameters = df_rs_results.to_json(orient="records")
-    parsed = json.loads(resultParameters)
 
+    topK = best_params_dict['params'][0]
+    shrink = best_params_dict['params'][1]
+    recommender = ItemKNNCBFRecommender(URM_train, ICM)
+    recommender.fit(shrink=shrink, topK=topK)
+    result_df, _ = evaluator_test.evaluateRecommender(recommender)
+
+    resultToSave = 'MAP = ' + str(best_params_dict['score']) + '    topK = ' + str(best_params_dict['params'][0]) + '   shrink = ' + str(best_params_dict['params'][1])
     with open("logs/" + recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
-        json.dump(parsed, json_file, indent=4)
+        json.dump(resultToSave,json_file, indent=4)
