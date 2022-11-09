@@ -1,7 +1,6 @@
 if __name__ == '__main__':
 
     from optuna.samplers import TPESampler
-    from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
     import pandas as pd
     import os
@@ -9,7 +8,6 @@ if __name__ == '__main__':
     from Utils.createURM import createBumpURM
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
-    #from Recommenders.MatrixFactorization.IALS_implicit_Recommender import IALSRecommender_implicit
     from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 
     import optuna as op
@@ -49,7 +47,6 @@ if __name__ == '__main__':
 
     def objective(trial):
 
-        #recommenders = []
 
         MAP_List_Fold = []
         
@@ -62,29 +59,22 @@ if __name__ == '__main__':
 
             recommender_IALS = IALSRecommender(URM_train_list[index], verbose=False)
 
-            #recommender_IALS.fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val, iterations=3)
-            recommender_IALS.fit(num_factors=n_factors, reg=0.01, alpha=alpha_val, epochs=3)
-
-            #recommenders.append(IALSRecommender_implicit(URM_train_list[index], verbose=False))
-
-            #recommenders[index].fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val,
-                                    #iterations=3)
-
-            #recommenders[index].URM_train = URM_train_list[index]  # utile in caso di combine
-            print("starting evaluation...")
-
             evaluator_validation = EvaluatorHoldout(URM_validation_list[index], cutoff_list=[10])
-            
+
+            recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=10, **{
+                'epochs_min' : 0,
+                'evaluator_object' : evaluator_validation,
+                'stop_on_validation' : True,
+                'validation_every_n' : 1,
+                'validation_metric' : 'MAP',
+                'lower_validations_allowed' : 3
+            })
+
+
             result_dict, _ = evaluator_validation.evaluateRecommender(recommender_IALS)
             
             MAP_List_Fold.append(result_dict.iloc[0]["MAP"])
-            
 
-        print("starting evaluation...")
-        #result = evaluator_validation.evaluateRecommender(recommenders)
-        #print(result)
-
-        #results.append(result)
 
         return sum(MAP_List_Fold) / len(MAP_List_Fold)
 
@@ -103,9 +93,8 @@ if __name__ == '__main__':
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
 
     recommender_IALS = IALSRecommender(URM_train, verbose=False)
-    #recommenders.append(IALSRecommender_implicit(URM_train_list[0], verbose=False))
 
-    recommender_IALS.fit(num_factors=n_factors, reg=0.01, alpha=alpha_val, epochs=iterations)
+    recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=iterations)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)
