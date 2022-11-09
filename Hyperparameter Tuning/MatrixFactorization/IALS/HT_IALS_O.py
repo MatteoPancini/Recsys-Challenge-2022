@@ -2,7 +2,7 @@ if __name__ == '__main__':
 
     from optuna.samplers import TPESampler
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Evaluation.Evaluator import EvaluatorHoldout
+    from Evaluation.Evaluator_IALS import EvaluatorHoldout
     import pandas as pd
     import os
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             recommender_IALS = IALSRecommender_implicit(URM_train=URM_train_list[index])
 
             #recommender_IALS.fit(n_factors=n_factors, regularization=regularization, alpha_val=alpha_val, iterations=3)
-            recommender_IALS.fit(n_factors=n_factors, regularization=0.01, alpha_val=alpha)
+            recommender_IALS.fit(n_factors=n_factors, regularization=0.01, iterations=1, alpha_val=alpha)
 
             #recommenders.append(IALSRecommender_implicit(URM_train_list[index], verbose=False))
 

@@ -2,8 +2,9 @@ if __name__ == '__main__':
     import pandas as pd
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+    from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
     from Utils.createURM import createBumpURM
+    from Utils.createICM import createICM
     import json
     import numpy as np
     from sklearn.model_selection import ParameterSampler
@@ -11,20 +12,24 @@ if __name__ == '__main__':
     dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
     URM = createBumpURM(dataset)
 
+    ICMLenght = pd.read_csv('../../../Input/data_ICM_length.csv')
+    ICMTypes = pd.read_csv('../../../Input/data_ICM_type.csv')
+    ICM = createICM(ICMLenght, ICMTypes, dataset)
+
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
     URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=[10])
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
 
-    recommender = ItemKNNCFRecommender(URM_train)
+    recommender = ItemKNNCBFRecommender(URM_train, ICM)
 
     grid_size = 100
-    TUNE_ITER = 50
+    TUNE_ITER = 20
     num_epochs = 5
     worse_score = 0
 
-    init_param_grid = {'topK': [i for i in range(100, 400)],
+    init_param_grid = {'topK': [i for i in range(10, 400)],
                        'shrink': [i for i in np.arange(10, 100)],
                        }
 
@@ -43,7 +48,7 @@ if __name__ == '__main__':
             # Get the set of parameter for this iteration
             strategy_params = param_list[tune_iter]
 
-            recommender = ItemKNNCFRecommender(URM_train)
+            recommender = ItemKNNCBFRecommender(URM_train, ICM)
             recommender.fit(shrink=strategy_params['shrink'], topK=strategy_params['topK'])
             results, _ = evaluator_validation.evaluateRecommender(recommender)
             results = results.loc[10]['MAP']
@@ -92,7 +97,7 @@ if __name__ == '__main__':
 
     topK = best_params_dict['params'][0]
     shrink = best_params_dict['params'][1]
-    recommender = ItemKNNCFRecommender(URM_train)
+    recommender = ItemKNNCBFRecommender(URM_train, ICM)
     recommender.fit(shrink=shrink, topK=topK)
     result_df, _ = evaluator_test.evaluateRecommender(recommender)
 
