@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('/Users/matteopancini/PycharmProjects/recsys-challenge-2022-Pancini-Vitali/Input/interactions_and_impressions.csv')
+    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
     URM = createBumpURM(dataset)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
-    study.optimize(objective, n_trials=3)
+    study.optimize(objective, n_trials=7)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log
