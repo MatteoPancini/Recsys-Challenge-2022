@@ -19,7 +19,7 @@ if __name__ == '__main__':
     URMs_train = []
     URMs_validation = []
 
-    for k in range(3):
+    for k in range(1):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
         URMs_train.append(URM_train)
         URMs_validation.append(URM_validation)
