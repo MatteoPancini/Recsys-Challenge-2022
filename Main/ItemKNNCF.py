@@ -1,10 +1,10 @@
 if __name__ == '__main__':
 
-    from Utils.createURM import createURM2
+    from Utils.recsys2022DataReader import createBumpURM
     from Utils.writeSubmission import write_submission
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 
-    URM = createURM2()
+    URM = createBumpURM()
 
     recommender = ItemKNNCFRecommender(URM)
     # BEST recommender.fit(shrink = int(11.360087017080575), topK = int(24.286589663434658))

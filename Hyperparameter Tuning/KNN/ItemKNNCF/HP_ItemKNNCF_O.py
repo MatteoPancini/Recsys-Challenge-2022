@@ -5,14 +5,14 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-    from Utils.createURM import createURM
+    from Utils.recsys2022DataReader import createBumpURM
     import optuna as op
     from optuna.samplers import TPESampler
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator

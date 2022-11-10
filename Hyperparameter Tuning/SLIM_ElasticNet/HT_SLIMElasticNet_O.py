@@ -1,10 +1,9 @@
 if __name__ == '__main__':
 
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
-    from joblib import Parallel, delayed
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import createBumpURM
+    from Utils.recsys2022DataReader import createBumpURM
     import pandas as pd
     import optuna as op
     from optuna.samplers import TPESampler
@@ -12,8 +11,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
-    URM = createBumpURM(dataset)
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator

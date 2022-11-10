@@ -5,7 +5,7 @@ if __name__ == '__main__':
     import pandas as pd
     import os
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-    from Utils.createURM import createBumpURM
+    from Utils.recsys2022DataReader import createBumpURM
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
     from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
@@ -16,8 +16,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('/Users/matteopancini/PycharmProjects/recsys-challenge-2022-Pancini-Vitali/Input/interactions_and_impressions.csv')
-    URM = createBumpURM(dataset)
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -93,10 +92,17 @@ if __name__ == '__main__':
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
 
     recommender_IALS = IALSRecommender(URM_train, verbose=False)
-
-    recommender_IALS.fit(num_factors=n_factors, reg=regularization, alpha=alpha_val, epochs=iterations)
-
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
+
+    recommender_IALS.fit(num_factors=600, reg=regularization, alpha=alpha_val, epochs=10, **{
+                'epochs_min' : 0,
+                'evaluator_object' : evaluator_test,
+                'stop_on_validation' : True,
+                'validation_every_n' : 1,
+                'validation_metric' : 'MAP',
+                'lower_validations_allowed' : 3
+            })
+
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)
 
     resultParameters = result_dict.to_json(orient="records")

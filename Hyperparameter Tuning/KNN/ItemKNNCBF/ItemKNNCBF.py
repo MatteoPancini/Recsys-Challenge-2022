@@ -3,18 +3,15 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
-    from Utils.createURM import createBumpURM
-    from Utils.createICM import createICM
+    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createSmallICM
     import json
     import numpy as np
     from sklearn.model_selection import ParameterSampler
 
-    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
-    URM = createBumpURM(dataset)
+    URM = createBumpURM()
 
-    ICMLenght = pd.read_csv('../../../Input/data_ICM_length.csv')
-    ICMTypes = pd.read_csv('../../../Input/data_ICM_type.csv')
-    ICM = createICM(ICMLenght, ICMTypes, dataset)
+    ICM = createSmallICM()
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.80)
     URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)

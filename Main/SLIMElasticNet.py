@@ -1,12 +1,11 @@
 if __name__ == '__main__':
 
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import tryURM
+    from Utils.recsys2022DataReader import createBumpURM
     from Utils.writeSubmission import write_submission
     import pandas as pd
 
-    dataset = pd.read_csv('../Input/interactions_and_impressions.csv')
-    URM = tryURM(dataset)
+    URM = createBumpURM()
 
     recommender = MultiThreadSLIM_SLIMElasticNetRecommender(URM, verbose=False)
     # BEST recommender.fit(alpha=0.06747829810332745, l1_ratio=0.039535749124922186, topK=int(334.5605306683192))

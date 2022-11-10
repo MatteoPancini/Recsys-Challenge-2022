@@ -5,13 +5,12 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Utils.createURM import tryURM
+    from Utils.recsys2022DataReader import createBumpURM
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('../../Input/interactions_and_impressions.csv')
-    URM = tryURM(dataset)
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator

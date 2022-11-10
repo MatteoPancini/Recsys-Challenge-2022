@@ -6,7 +6,7 @@ if __name__ == '__main__':
     import csv
     import pandas as pd
     from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
-    from Utils.createURM import *
+    from Utils.recsys2022DataReader import *
 
 
     # ---------------------------------------------------------------------------------------------------------
@@ -19,8 +19,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('/Users/matteopancini/PycharmProjects/recsys-challenge-2022-Pancini-Vitali/Input/interactions_and_impressions.csv')
-    URM = createBumpURM(dataset)
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator

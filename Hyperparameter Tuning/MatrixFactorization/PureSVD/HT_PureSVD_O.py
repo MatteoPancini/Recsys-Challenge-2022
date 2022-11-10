@@ -3,15 +3,13 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDItemRecommender
-    from Utils.createURM import createURMFormDataset
+    from Utils.recsys2022DataReader import createBumpURM
     import json
     import optuna as op
-    import pandas as pd
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    dataset = pd.read_csv('../../../Input/interactions_and_impressions.csv')
-    URM = createURMFormDataset(dataset)
+    URM = createBumpURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator

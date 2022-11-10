@@ -1,12 +1,15 @@
 if __name__ == '__main__':
+
     import numpy as np
     import pandas as pd
     from sklearn.model_selection import ParameterSampler
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDItemRecommender
+    from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Utils.recsys2022DataReader import createBumpURM
     import json
+    from datetime import datetime
+    from tqdm import tqdm
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
@@ -24,36 +27,37 @@ if __name__ == '__main__':
     # Coarse-to-fine hyperparameter model
 
     grid_size = 100
-    TUNE_ITER = 20
-    num_epochs = 5
+    TUNE_ITER = 10
+    num_epochs = 10
     worse_score = 0
 
     # Hyperparameter tuning interval
-    init_param_grid = {'num_factors': [i for i in range(10, 1000)],
-                       'topK': [i for i in range(400,1200)],
+    init_param_grid = {'topK': [i for i in range(10, 600)],
+                       'alpha' : [i for i in np.arange(0.1, 0.9)]
                        }
 
     new_param_grid = init_param_grid.copy()
     best_params_dict = {'score': worse_score, 'params': []}
     tried_params_list = []
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
 
         # List of sampled hyperparameter combinations will be used for random search
         param_list = list(ParameterSampler(new_param_grid, n_iter=TUNE_ITER, random_state=0))
 
         # Searching the Best Parameters with Random Search
         rs_results_dict = {}
-        for tune_iter in range(TUNE_ITER):
+        for tune_iter in tqdm(range(TUNE_ITER)):
             # Get the set of parameter for this iteration
             strategy_params = param_list[tune_iter]
 
-            recommender = PureSVDItemRecommender(URM_train, verbose=False)
-            recommender.fit(num_factors=strategy_params['num_factors'], topK=strategy_params['topK'])
+            recommender = P3alphaRecommender(URM_train, verbose=False)
+            recommender.fit(alpha=strategy_params['alpha'], topK=strategy_params['topK'])
             results, _ = evaluator_validation.evaluateRecommender(recommender)
             results = results.loc[10]['MAP']
 
             rs_results_dict[tuple(strategy_params.values())] = {'score': results}
+            print(rs_results_dict)
 
             if results > best_params_dict['score']:
                 best_params_dict['score'] = results
@@ -85,8 +89,7 @@ if __name__ == '__main__':
         # Generate new hyperparameter space based on current worse and best hyperparameter combinations
         for key in init_param_grid:
             if isinstance(init_param_grid[key][0], int):
-                new_param_grid[key] = np.unique(
-                    [i for i in range(int(df_rs_results_min[key]), int(df_rs_results_max[key]) + 1)])
+                new_param_grid[key] = np.unique([i for i in range(int(df_rs_results_min[key]), int(df_rs_results_max[key]) + 1)])
             elif isinstance(init_param_grid[key][0], float):
                 new_param_grid[key] = np.unique(np.linspace(df_rs_results_min[key], df_rs_results_max[key], grid_size))
             else:
@@ -100,5 +103,6 @@ if __name__ == '__main__':
     resultParameters = df_rs_results.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+
+    with open("logs/" + recommender.RECOMMENDER_NAME + datetime.now().strftime('%b%d_%H-%M-%S/') + "_logs.json", 'w') as json_file:
         json.dump(parsed, json_file, indent=4)
