@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
-    recommenders_P3alpha_list = []
+    recommender_P3alpha_list = []
 
 
     # for index in range(len(URM_train_list)):
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         for index in range(len(URM_train_list)):
             recommender_P3alpha = P3alphaRecommender(URM_train_list[index], verbose=False)
 
-            recommenders_P3alpha_list.append(recommender_P3alpha)
+            recommender_P3alpha_list.append(recommender_P3alpha)
 
             recommender_P3alpha.fit(alpha=alpha, topK=topK)
 
