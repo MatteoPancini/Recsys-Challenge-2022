@@ -6,7 +6,7 @@ Created on 21/11/2020
 @author: Alessandro Sanvito
 """
 
-from ..Base.BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
+from ..BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
 from .RP3betaRecommender import RP3betaRecommender
 
 class RP3betaCBFRecommender(BaseItemSimilarityMatrixRecommender):
