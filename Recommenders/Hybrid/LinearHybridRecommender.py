@@ -9,7 +9,7 @@ class LinearHybridTwoRecommender(BaseItemSimilarityMatrixRecommender):
     RECOMMENDER_NAME = "ItemKNNScoresHybridRecommender"
 
     def __init__(self, URM_train, Recommender_1, Recommender_2):
-        super(LinearHybridTwoRecommender, self).__init__(URM_train)
+        super(LinearHybridTwoRecommender, self).__init__(URM_train, verbose=False)
         self.W_sparse = None
         self.URM_train = check_matrix(URM_train.copy(), 'csr')
         self.Recommender_1 = Recommender_1

@@ -3,11 +3,13 @@ if __name__ == '__main__':
     from Utils.recsys2022DataReader import createBumpURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    from Recommenders.Hybrid.MergedHybridRecommender import MergedHybridRecommender
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommender
     from optuna.samplers import TPESampler
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     import optuna as op
+    import json
+    from datetime import datetime
 
     URM = createBumpURM()
 
@@ -19,7 +21,7 @@ if __name__ == '__main__':
     ItemKNNCF_recommender = ItemKNNCFRecommender(URM_train)
     SLIM_recommender = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
 
-
+    """
     def objective(trial):
         topKCF = trial.suggest_int("topKCF", 300, 400)
         shrinkCF = trial.suggest_float("shrinkCF", 10, 100)
@@ -31,9 +33,28 @@ if __name__ == '__main__':
         ItemKNNCF_recommender.fit(topK=topKCF, shrink=shrinkCF)
         SLIM_recommender.fit(topK=topKSLM, alpha=alphaSLM, l1_ratio=l1_ratioSLM)
 
-        recommender = MergedHybridRecommender(URM_train, recommender1=ItemKNNCF_recommender,recommender2=SLIM_recommender, verbose=False)
+        recommender = LinearHybridTwoRecommender(URM_train, Recommender_1=ItemKNNCF_recommender, Recommender_2=SLIM_recommender)
         recommender.fit(alpha=alpha)
 
         result, _ = evaluator_validation.evaluateRecommender(recommender)
 
         return result.loc[10]['MAP']
+
+
+    study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
+    study.optimize(objective, n_trials=1)"""
+
+    ItemKNNCF_recommender.fit(topK=329, shrink=97)
+    SLIM_recommender.fit(topK=362, alpha=0.06747829810332745, l1_ratio=0.0005493724398243842)
+
+    recommender = LinearHybridTwoRecommender(URM_train, Recommender_1=ItemKNNCF_recommender, Recommender_2=SLIM_recommender)
+    recommender.fit(alpha=0.2)
+
+    result, _ = evaluator_test.evaluateRecommender(recommender)
+
+    resultParameters = result.to_json(orient="records")
+    parsed = json.loads(resultParameters)
+
+    with open("logs/" + recommender.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime('%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+        #json.dump(study.best_params, json_file, indent=4)
+        json.dump(parsed, json_file, indent=4)
