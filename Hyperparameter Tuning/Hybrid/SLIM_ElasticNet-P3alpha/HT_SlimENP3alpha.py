@@ -9,6 +9,7 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommender
     from Utils.recsys2022DataReader import *
 
     # ---------------------------------------------------------------------------------------------------------
@@ -22,7 +23,9 @@ if __name__ == "__main__":
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
-    for k in range(1):
+    kfold = 1
+
+    for k in range(kfold):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -32,35 +35,36 @@ if __name__ == "__main__":
     recommender_P3alpha_list = []
     recommender_SLIMElasticNet_list = []
 
-    for i in range(k):
+    for i in range(kfold):
         # Recommender 1 - P3alpha
         recommender_P3alpha = P3alphaRecommender(URM_train[i])
         recommender_P3alpha.fit(topK=424, alpha=0.8779015738944255)
-        recommender_SLIMElasticNet_list.append(recommender_P3alpha)
+        recommender_P3alpha_list.append(recommender_P3alpha)
 
         # Recommender 2 - SLIM Elastic Net
         recommender_SLIMElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train[i])
         recommender_SLIMElasticNet.fit(alpha=0.06747829810332745, l1_ratio=0.0005493724398243842, topK=362)
         recommender_SLIMElasticNet_list.append(recommender_SLIMElasticNet)
 
+    hybridRecommender_list = []
 
     def objective(trial):
 
         MAP_List_Fold = []
 
-        topK = trial.suggest_int("topK", 250, 600)
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
+        alpha = trial.suggest_float("alpha", 0, 1)
 
         for index in range(len(URM_train_list)):
-            recommender_P3alpha = P3alphaRecommender(URM_train_list[index], verbose=False)
+            hybridRecommender = LinearHybridTwoRecommender(URM_train=URM_train_list[index], Recommender_1=recommender_SLIMElasticNet_list[index],
+                                                           Recommender_2=recommender_P3alpha_list[index])
 
-            recommender_P3alpha_list.append(recommender_P3alpha)
+            hybridRecommender.fit(alpha=alpha)
 
-            recommender_P3alpha.fit(alpha=alpha, topK=topK)
+            hybridRecommender_list.append(hybridRecommender)
 
             evaluator_validation = EvaluatorHoldout(URM_validation_list[index], cutoff_list=[10])
 
-            result_dict, _ = evaluator_validation.evaluateRecommender(recommender_P3alpha)
+            result_dict, _ = evaluator_validation.evaluateRecommender(hybridRecommender)
 
             MAP_List_Fold.append(result_dict.iloc[0]["MAP"])
 
@@ -68,4 +72,22 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize', sampler=TPESampler(multivariate=True))
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=3)
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Writing hyperparameter into a log
+
+    alpha = study.best_params['alpha']
+
+    hybridRecommender_list[0].fit(alpha=alpha)
+
+    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
+    result_dict, _ = evaluator_test.evaluateRecommender(recommender_SLIMElasticNet_list[0])
+
+    resultParameters = result_dict.to_json(orient="records")
+    parsed = json.loads(resultParameters)
+
+    with open("logs/" + hybridRecommender_list[0].RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+            '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+        json.dump(study.best_params, json_file, indent=4)
+        json.dump(parsed, json_file, indent=4)

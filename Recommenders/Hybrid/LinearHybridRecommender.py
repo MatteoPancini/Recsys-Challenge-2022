@@ -22,6 +22,7 @@ class LinearHybridTwoRecommender(BaseItemSimilarityMatrixRecommender):
         item_weights_1 = self.Recommender_1._compute_item_score(user_id_array, items_to_compute)
         item_weights_2 = self.Recommender_2._compute_item_score(user_id_array, items_to_compute)
 
+
         item_weights = item_weights_1 * self.alpha + item_weights_2 * (1 - self.alpha)
 
         return item_weights
