@@ -1,13 +1,12 @@
 if __name__ == '__main__':
 
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Utils.createURM import createBumpURM
+    from Utils.recsys2022DataReader import createBumpURM
     import pandas as pd
     from Utils.writeSubmission import write_submission
 
     # Loading URM
-    dataset = pd.read_csv('../Input/interactions_and_impressions.csv')
-    URM = createBumpURM(dataset)
+    URM = createBumpURM()
 
     #Create the recommender
     recommender = RP3betaRecommender(URM, verbose=False)

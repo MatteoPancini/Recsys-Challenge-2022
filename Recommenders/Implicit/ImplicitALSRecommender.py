@@ -1,6 +1,7 @@
 import implicit
 from ..BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
-
+from ..Recommender_utils import check_matrix
+import numpy as np
 
 class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
     """ImplicitALSRecommender recommender"""
@@ -14,7 +15,7 @@ class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
             iterations=15,
             calculate_training_loss=False, num_threads=0,
             confidence_scaling=None,
-            **confidence_args
+            alpha=24
             ):
 
         self.rec = implicit.als.AlternatingLeastSquares(factors=factors, regularization=regularization,
@@ -22,7 +23,13 @@ class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
                                                         iterations=iterations,
                                                         calculate_training_loss=calculate_training_loss,
                                                         num_threads=num_threads)
-        self.rec.fit(confidence_scaling(self.URM_train, **confidence_args).T, show_progress=self.verbose)
+
+        C = check_matrix(self.URM_train, format="csr", dtype=np.float32)
+        C.data = 1.0 + alpha * C.data
+
+        self.rec.fit(C.T, show_progress=self.verbose)
 
         self.USER_factors = self.rec.user_factors
         self.ITEM_factors = self.rec.item_factors
+
+
