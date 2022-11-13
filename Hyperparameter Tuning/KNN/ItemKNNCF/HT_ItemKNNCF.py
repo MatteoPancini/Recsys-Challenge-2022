@@ -18,20 +18,19 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
     URM_train_list = []
     URM_validation_list = []
 
     for k in range(2):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.85)
+        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
     MAP_results_list = []
-
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
@@ -54,21 +53,17 @@ if __name__ == '__main__':
         for index in range(len(URM_train_list)):
 
             recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
-
             recommender_ItemKNNCF_list[index].fit(shrink=shrink, topK=topK)
-
             recommender_ItemKNNCF_list[index].URM_Train = URM_train_list[index]
 
-
         MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
-
         MAP_results_list.append(MAP_result)
 
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=2)
+    study.optimize(objective, n_trials=1)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -78,12 +73,10 @@ if __name__ == '__main__':
     #similarity = study.best_params['similarity']
     #feature_weighting = study.best_params['feature_weighting']
 
-    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train, verbose=False)
-
+    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init, verbose=False)
     recommender_ItemKNNCF.fit(shrink=shrink, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
-
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_ItemKNNCF)
 
     # ---------------------------------------------------------------------------------------------------------

@@ -17,13 +17,13 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
     URM_train_list = []
     URM_validation_list = []
 
     for k in range(3):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.85)
+        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
 
@@ -43,27 +43,24 @@ if __name__ == '__main__':
         alpha: [0, 2]
         """
 
-        topK = trial.suggest_int("topK", 5, 1000)
-        alpha = trial.suggest_float("alpha", 0, 2)
+        topK = trial.suggest_int("topK", 100, 1000)
+        alpha = trial.suggest_float("alpha", 0, 1)
 
         for index in range(len(URM_train_list)):
 
             recommender_P3alpha_list.append(P3alphaRecommender(URM_train_list[index], verbose=False))
-
             recommender_P3alpha_list[index].fit(alpha=alpha, topK=topK)
-
             recommender_P3alpha_list[index].URM_Train = URM_train_list[index]
 
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_P3alpha_list)
-
         MAP_results_list.append(MAP_result)
 
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=2)
+    study.optimize(objective, n_trials=1)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -71,7 +68,7 @@ if __name__ == '__main__':
     topK = study.best_params['topK']
     alpha = study.best_params['alpha']
 
-    recommender_P3alpha = P3alphaRecommender(URM_train, verbose=False)
+    recommender_P3alpha = P3alphaRecommender(URM_train_init, verbose=False)
 
     recommender_P3alpha.fit(alpha=alpha, topK=topK)
 
