@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # Coarse-to-fine hyperparameter model
 
     grid_size = 100
-    TUNE_ITER = 10
+    TUNE_ITER = 5
     num_epochs = 3
     worse_score = 0
 
