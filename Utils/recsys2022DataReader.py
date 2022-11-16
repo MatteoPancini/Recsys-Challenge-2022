@@ -6,9 +6,10 @@ import numpy as np
 # - ../../Input/ if run from notebooks and main Hybrid .py
 # - ../../../Input/ if run from python file
 
-urmPath = "../../Input/interactions_and_impressions.csv"
-icmTypePath = "../../../Input/data_ICM_type.csv"
-icmLenghtPath = "../../../Input/data_ICM_length.csv"
+urmPath = "../../../Input/interactions_and_impressions.csv"
+newUrm = "../../../Input/URM.csv"
+icmTypePath = "../../Input/data_ICM_type.csv"
+icmLenghtPath = "../../Input/data_ICM_length.csv"
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 def createBumpURM():
@@ -134,3 +135,9 @@ def createBigICM():
     ICM = sp.csr_matrix(ICM)
 
     return ICM
+
+def tryNewURM():
+    URM = pd.read_csv(newUrm)
+
+    URM = sp.csr_matrix(URM)
+    return URM

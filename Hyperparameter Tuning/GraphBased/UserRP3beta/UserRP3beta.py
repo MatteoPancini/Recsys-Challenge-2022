@@ -17,13 +17,13 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(2):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.85)
+    for k in range(3):
+        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
 
@@ -38,16 +38,13 @@ if __name__ == '__main__':
 
         recommender_UserRP3beta_list = []
 
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
-        beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 10, 500)
+        alpha = trial.suggest_float("alpha", 0.5, 0.9)
+        beta = trial.suggest_float("beta", 0.4, 0.9)
+        topK = trial.suggest_int("topK", 300, 500)
 
         for index in range(len(URM_train_list)):
-
             recommender_UserRP3beta_list.append(UserRP3betaRecommender(URM_train_list[index], verbose=False))
             recommender_UserRP3beta_list[index].fit(alpha=alpha, topK=topK, beta=beta)
-            recommender_UserRP3beta_list[index].URM_Train = URM_train_list[index]
-
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_UserRP3beta_list)
         MAP_results_list.append(MAP_result)
@@ -56,7 +53,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=1)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -65,7 +62,7 @@ if __name__ == '__main__':
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
 
-    recommender_UserRP3beta = UserRP3betaRecommender(URM_train, verbose=False)
+    recommender_UserRP3beta = UserRP3betaRecommender(URM_train_init, verbose=False)
     recommender_UserRP3beta.fit(alpha=alpha, topK=topK, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])

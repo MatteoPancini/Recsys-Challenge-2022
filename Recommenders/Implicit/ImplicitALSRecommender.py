@@ -27,7 +27,7 @@ class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
         C = check_matrix(self.URM_train, format="csr", dtype=np.float32)
         C.data = 1.0 + alpha * C.data
 
-        self.rec.fit(C.T, show_progress=self.verbose)
+        self.rec.fit(C, show_progress=self.verbose)
 
         self.USER_factors = self.rec.user_factors
         self.ITEM_factors = self.rec.item_factors
