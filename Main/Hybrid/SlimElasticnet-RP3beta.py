@@ -11,13 +11,13 @@ if __name__ == '__main__':
 
     # Create the recommenders
     recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM)
-    recommender_Slim_Elasticnet.fit(alpha=0.06747829810332745, l1_ratio=0.0005493724398243842, topK=362)
+    recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
 
     recommender_RP3beta = RP3betaRecommender(URM)
-    recommender_RP3beta.fit(alpha=0.2723304259820941, beta=0.34952850616150266, topK=78)
+    recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
 
     recommender_Hybrid = LinearHybridTwoRecommender(URM_train=URM, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
-    recommender_Hybrid.fit(alpha=0.3336517997848819)
+    recommender_Hybrid.fit(alpha=0.27553159386864057)
 
     # Write the submission file
     write_submission(recommender=recommender_Hybrid,

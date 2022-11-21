@@ -3,16 +3,15 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM
-    from Data_manager.split_functions.split_train_validation_random_holdout import \
-        split_train_in_two_percentage_global_sample
+    from Utils.recsys2022DataReader import createURMNEW3
+    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     import optuna as op
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createBumpURM()
+    URM = createURMNEW3()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -38,11 +37,6 @@ if __name__ == '__main__':
 
         recommender_P3alpha_list = []
 
-        """ Max Intervals:
-        topk: [5, 1000]
-        alpha: [0, 2]
-        """
-
         topK = trial.suggest_int("topK", 100, 1000)
         alpha = trial.suggest_float("alpha", 0, 1)
 
@@ -50,7 +44,6 @@ if __name__ == '__main__':
 
             recommender_P3alpha_list.append(P3alphaRecommender(URM_train_list[index], verbose=False))
             recommender_P3alpha_list[index].fit(alpha=alpha, topK=topK)
-            recommender_P3alpha_list[index].URM_Train = URM_train_list[index]
 
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_P3alpha_list)
@@ -60,7 +53,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=1)
+    study.optimize(objective, n_trials=10)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -69,11 +62,9 @@ if __name__ == '__main__':
     alpha = study.best_params['alpha']
 
     recommender_P3alpha = P3alphaRecommender(URM_train_init, verbose=False)
-
     recommender_P3alpha.fit(alpha=alpha, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
-
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_P3alpha)
 
     # ---------------------------------------------------------------------------------------------------------

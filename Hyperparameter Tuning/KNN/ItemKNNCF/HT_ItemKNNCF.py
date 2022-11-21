@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBumpURM()
+    URM = createURMNEW3()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(2):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -38,13 +38,6 @@ if __name__ == '__main__':
 
         recommender_ItemKNNCF_list = []
 
-        """ Max Intervals:
-        topk: [10, 1000]
-        shrink: [10, 1000]
-        similarity: ['cosine', 'pearson', 'jaccard', 'tanimoto', 'adjusted', 'euclidean']
-        feature_weighting: ["BM25", "TF-IDF", "none"]
-        """
-
         topK = trial.suggest_int("topK", 100, 500)
         shrink = trial.suggest_float("shrink", 10, 200)
         #similarity = trial.suggest_categorical("similarity", ['cosine', 'pearson', 'jaccard', 'tanimoto', 'adjusted', 'euclidean'])
@@ -54,29 +47,25 @@ if __name__ == '__main__':
 
             recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
             recommender_ItemKNNCF_list[index].fit(shrink=shrink, topK=topK)
-            recommender_ItemKNNCF_list[index].URM_Train = URM_train_list[index]
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
         MAP_results_list.append(MAP_result)
-
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=0)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
-    """topK = study.best_params['topK']
-    shrink = study.best_params['shrink']"""
+    topK = study.best_params['topK']
+    shrink = study.best_params['shrink']
     #similarity = study.best_params['similarity']
     #feature_weighting = study.best_params['feature_weighting']
 
     recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init, verbose=False)
-    #recommender_ItemKNNCF.fit(shrink=shrink, topK=topK)
-    recommender_ItemKNNCF.fit(shrink=53.58554278023007, topK=1101)
-
+    recommender_ItemKNNCF.fit(shrink=shrink, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_ItemKNNCF)
@@ -89,5 +78,5 @@ if __name__ == '__main__':
 
     with open("logs/" + recommender_ItemKNNCF.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
-        #json.dump(study.best_params, json_file, indent=4)
+        json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

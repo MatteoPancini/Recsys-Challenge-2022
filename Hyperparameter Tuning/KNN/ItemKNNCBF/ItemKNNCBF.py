@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM, createSmallICM
+    from Utils.recsys2022DataReader import createBigNewURM3, createBigICM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
     import optuna as op
@@ -12,8 +12,8 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBumpURM()
-    ICM = createSmallICM()
+    URM = createBigNewURM3()
+    ICM = createBigICM()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(2):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -46,7 +46,6 @@ if __name__ == '__main__':
 
             recommender_ItemKNNCBF_list.append(ItemKNNCBFRecommender(URM_train_list[index], ICM, verbose=False))
             recommender_ItemKNNCBF_list[index].fit(shrink=shrink, topK=topK)
-            recommender_ItemKNNCBF_list[index].URM_Train = URM_train_list[index]
 
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCBF_list)
@@ -56,7 +55,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

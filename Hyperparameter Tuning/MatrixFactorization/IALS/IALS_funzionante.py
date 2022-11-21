@@ -4,10 +4,10 @@ if __name__ == '__main__':
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     import json
     from bayes_opt import BayesianOptimization
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
-    URM_all = createBumpURM()
+    URM_all = createURMNEW3()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM_all, train_percentage=0.85)
 
@@ -31,15 +31,15 @@ if __name__ == '__main__':
 
     tuning_params = {
         "alpha": (10, 50),
-        "factors": (200, 600),
-        "epochs": (10, 100)
+        "factors": (200, 300),
+        "iterations": (10, 100)
     }
 
     results = []
 
     def BO_func(
             factors,
-            epochs,
+            iterations,
             alpha
     ):
         for index in range(len(recommenders)):
@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 factors=int(factors),
                 regularization=0.01,
                 use_gpu=False,
-                iterations=int(epochs),
+                iterations=int(iterations),
                 num_threads=4,
                 **{"alpha": alpha}
             )
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     optimizer.maximize(
         init_points=10,
-        n_iter=50
+        n_iter=20
     )
 
     alpha = optimizer.max["params"]["alpha"]
@@ -84,6 +84,6 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommenders[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
-        json.dump(parsed, json_file)
-        json.dump(optimizer.max, json_file)
+    #with open("logs/" + recommenders[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+     #   json.dump(parsed, json_file)
+     #   json.dump(optimizer.max, json_file)
