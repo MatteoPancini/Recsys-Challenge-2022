@@ -5,7 +5,7 @@ if __name__ == '__main__':
     from Evaluation.Evaluator_IALS import EvaluatorHoldout
     import os
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
     from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createBumpURM()
+    URM = createURMNEW3()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator

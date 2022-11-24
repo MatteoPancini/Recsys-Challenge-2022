@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     optimizer.maximize(
         init_points=10,
-        n_iter=20
+        n_iter=40
     )
 
     alpha = optimizer.max["params"]["alpha"]
