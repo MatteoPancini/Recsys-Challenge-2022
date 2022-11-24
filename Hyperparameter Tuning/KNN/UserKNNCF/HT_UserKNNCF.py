@@ -3,17 +3,32 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
     import optuna as op
     from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
     import json
+    import csv
+    from datetime import datetime
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBumpURM()
+    URM = createURMNEW3()
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Creating CSV header
+
+    header = ['recommender', 'shrink', 'topk', 'MAP']
+
+    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+
+    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
+        writer = csv.writer(f)
+
+        # write the header
+        writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -40,21 +55,27 @@ if __name__ == "__main__":
 
         recommender_UserKNNCF_list = []
 
-        topK = trial.suggest_int("topK", 10, 5000)
+        topK = trial.suggest_int("topK", 100, 2000)
         shrink = trial.suggest_float("shrink", 10, 1000)
 
         for index in range(len(URM_train_list)):
             recommender_UserKNNCF_list.append(UserKNNCFRecommender(URM_train_list[index], verbose=False))
-            recommender_UserKNNCF_list[index].fit(shrink=shrink, topK=topK)
+            recommender_UserKNNCF_list[index].fit(shrink=shrink, topK=topK, similarity='cosine', feature_weighting='TF-IDF')
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_UserKNNCF_list)
         MAP_results_list.append(MAP_result)
+
+        resultsToPrint = [recommender_UserKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, sum(MAP_result) / len(MAP_result)]
+
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(resultsToPrint)
 
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=2)
+    study.optimize(objective, n_trials=30)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

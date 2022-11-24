@@ -1,0 +1,2 @@
+recommender,shrink,topk,MAP
+UserKNNCFRecommender,325.12836612710385,1941,0.01612485784703434

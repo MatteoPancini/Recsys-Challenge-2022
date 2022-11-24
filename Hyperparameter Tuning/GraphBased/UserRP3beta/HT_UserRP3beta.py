@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.GraphBased.UserRP3betaRecommender import UserRP3betaRecommender
     import optuna as op
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBumpURM()
+    URM = createURMNEW3()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
         recommender_UserRP3beta_list = []
 
-        alpha = trial.suggest_float("alpha", 0.5, 0.9)
-        beta = trial.suggest_float("beta", 0.4, 0.9)
-        topK = trial.suggest_int("topK", 300, 500)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
+        topK = trial.suggest_int("topK", 10, 1000)
 
         for index in range(len(URM_train_list)):
             recommender_UserRP3beta_list.append(UserRP3betaRecommender(URM_train_list[index], verbose=False))
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=1)
+    study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
