@@ -55,14 +55,52 @@ def createURMNEW3():
             elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 0:
                 URM[datasetCOO.row[x]][datasetCOO.col[x]] = 2
                 ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] >= 2 and ones_list[datasetCOO.row[x]][datasetCOO.col[x]] < 3:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+                ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] > 1 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 5 and \
+                    URM[datasetCOO.row[x]][datasetCOO.col[x]] != 7 and ones_list[datasetCOO.row[x]][
+                datasetCOO.col[x]] >= 3:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = URM[datasetCOO.row[x]][datasetCOO.col[x]] - 1
+
+    URM = sp.csr_matrix(URM)
+    return URM
+
+def createURMNegative():
+
+    dataset = pd.read_csv(urmPath)
+
+    dataset = dataset.drop(columns=['Impressions'])
+
+    datasetCOO = sp.coo_matrix((dataset["Data"].values, (dataset["UserID"].values, dataset["ItemID"].values)))
+    userIDS = dataset['UserID'].unique()
+    itemIDS = dataset['ItemID'].unique()
+
+    URM = np.zeros((len(userIDS), len(itemIDS)), dtype=int)
+    ones_list = np.zeros((len(userIDS), len(itemIDS)), dtype=int)
+    negative_users = []
+
+    for x in range(len(datasetCOO.data)):
+        if datasetCOO.data[x] == 0:
+            negative_users.remove(datasetCOO.row[x])
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] <= 4:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(5)
+            else:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(7)
+        elif datasetCOO.data[x] == 1:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 7:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(5)
+            elif datasetCOO.row[x] not in negative_users:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = -1
+                negative_users.append(datasetCOO.row[x])
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 2
+                ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
             elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 2 and ones_list[datasetCOO.row[x]][datasetCOO.col[x]] <= 3:
                 URM[datasetCOO.row[x]][datasetCOO.col[x]] += 1
                 ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
             elif URM[datasetCOO.row[x]][datasetCOO.col[x]] > 1 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 5 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 7 and ones_list[datasetCOO.row[x]][datasetCOO.col[x]] > 3:
                 URM[datasetCOO.row[x]][datasetCOO.col[x]] = URM[datasetCOO.row[x]][datasetCOO.col[x]] - 1
-
-    URM = sp.csr_matrix(URM)
-    return URM
 
 def createBigNewURM3():
     dataset = pd.read_csv(urmPath)
