@@ -3,7 +3,7 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURMNEW3
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
     import optuna as op
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBumpURM()
+    URM = createURMNEW3()
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
