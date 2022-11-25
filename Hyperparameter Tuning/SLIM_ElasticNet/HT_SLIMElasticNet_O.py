@@ -2,17 +2,30 @@ if __name__ == "__main__":
 
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import createURMNEW3
+    from Utils.recsys2022DataReader import createURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
     import optuna as op
+    import csv
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURMNEW3()
+    URM = createURM()
 
+    # ---------------------------------------------------------------------------------------------------------
+    # Creating CSV header
+
+    header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
+
+    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+
+    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
+        writer = csv.writer(f)
+
+        # write the header
+        writer.writerow(header)
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
@@ -50,11 +63,17 @@ if __name__ == "__main__":
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)
         MAP_results_list.append(MAP_result)
 
+        resultsToPrint = [recommender_SlimElasticnet_list[0].RECOMMENDER_NAME, alpha, l1_ratio, topK, sum(MAP_result) / len(MAP_result)]
+
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(resultsToPrint)
+
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=10)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

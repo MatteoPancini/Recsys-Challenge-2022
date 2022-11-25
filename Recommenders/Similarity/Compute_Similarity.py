@@ -30,7 +30,7 @@ class SimilarityFunction(Enum):
 class Compute_Similarity:
 
 
-    def __init__(self, dataMatrix, use_implementation = "density", similarity = None, **args):
+    def __init__(self, dataMatrix, use_implementation = "python", similarity = None, **args):
         """
         Interface object that will call the appropriate similarity implementation
         :param dataMatrix:              scipy sparse matrix |features|x|items| or |users|x|items|

@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Evaluation.Evaluator import EvaluatorHoldout
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
-    from Utils.recsys2022DataReader import createBigNewURM3, createBigICM
+    from Utils.recsys2022DataReader import createBigURM, createBigICM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
     import optuna as op
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
-    URM = createBigNewURM3()
+    URM = createBigURM()
     ICM = createBigICM()
 
     # ---------------------------------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

@@ -4,10 +4,10 @@ if __name__ == '__main__':
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     import json
     from bayes_opt import BayesianOptimization
-    from Utils.recsys2022DataReader import createURMNEW3
+    from Utils.recsys2022DataReader import createURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
-    URM_all = createURMNEW3()
+    URM_all = createURM()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM_all, train_percentage=0.85)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     tuning_params = {
         "alpha": (10, 50),
-        "factors": (200, 300),
+        "factors": (200, 250),
         "iterations": (10, 100)
     }
 
