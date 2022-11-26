@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
-    """
+
     header = ['recommender', 'alpha', 'MAP']
 
     partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
@@ -29,13 +29,13 @@ if __name__ == '__main__':
 
         # write the header
         writer.writerow(header)
-    """
+
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
-    """
+
     URM_train_list = []
     URM_validation_list = []
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # Fitting and testing to get local MAP
 
     alpha = study.best_params['alpha']
-    """
+
     recommender_P3alpha = P3alphaRecommender(URM_train_init, verbose=False)
     recommender_P3alpha.fit(alpha=0.8561168568686058, topK=218)
 

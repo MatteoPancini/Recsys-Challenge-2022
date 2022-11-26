@@ -7,8 +7,8 @@ import numpy as np
 # - ../../../Input/ if run from python file
 
 urmPath = "../../../Input/interactions_and_impressions.csv"
-icmTypePath = "../../Input/data_ICM_type.csv"
-icmLenghtPath = "../../Input/data_ICM_length.csv"
+icmTypePath = "../../../Input/data_ICM_type.csv"
+icmLenghtPath = "../../../Input/data_ICM_length.csv"
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 def createURM():

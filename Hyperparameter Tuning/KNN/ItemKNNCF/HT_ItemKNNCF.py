@@ -10,6 +10,7 @@ if __name__ == '__main__':
     import optuna as op
     import json
     import csv
+    from Utils.crossKValidator import CrossKValidator
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
@@ -34,15 +35,8 @@ if __name__ == '__main__':
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
-    URM_train_list = []
-    URM_validation_list = []
-
-    for k in range(3):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
-        URM_train_list.append(URM_train)
-        URM_validation_list.append(URM_validation)
-
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
+    cross_validator = CrossKValidator(URM_train_init, k=3)
+    evaluator_validation, URM_train_list, URM_validation_list = cross_validator.create_k_evaluators()
 
     MAP_results_list = []
     # ---------------------------------------------------------------------------------------------------------

@@ -1,13 +1,16 @@
 if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator_IALS import EvaluatorHoldout
-    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
+    from Recommenders.Implicit.FeatureCombinedImplicitALSRecommender import FeatureCombinedImplicitALSRecommender
+    from Utils.combine_matrix import combine
     import json
     from bayes_opt import BayesianOptimization
-    from Utils.recsys2022DataReader import createURM
+    from Utils.confidence_scaling import linear_scaling_confidence
+    from Utils.recsys2022DataReader import createURM, createSmallICM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
     URM_all = createURM()
+    ICM = createSmallICM()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM_all, train_percentage=0.85)
 
@@ -25,31 +28,41 @@ if __name__ == '__main__':
 
     for index in range(len(URMs_train)):
         recommenders.append(
-            ImplicitALSRecommender(URM_train=URMs_train[index])
+            FeatureCombinedImplicitALSRecommender(
+                URM_train=URMs_train[index],
+                ICM_train=ICM,
+                verbose=True
+            )
         )
 
-
     tuning_params = {
-        "alpha": (10, 50),
-        "factors": (200, 250),
-        "iterations": (10, 100)
+        "urm_alpha": (40, 100),
+        "icm_alpha": (40, 100),
+        "factors": (200, 300),
+        "epochs": (10, 100)
     }
 
     results = []
 
+
     def BO_func(
             factors,
-            iterations,
-            alpha
+            epochs,
+            urm_alpha,
+            icm_alpha
     ):
         for index in range(len(recommenders)):
             recommenders[index].fit(
                 factors=int(factors),
                 regularization=0.01,
                 use_gpu=False,
-                iterations=int(iterations),
+                iterations=int(epochs),
                 num_threads=4,
-                **{"alpha": alpha}
+                confidence_scaling = linear_scaling_confidence,
+                **{
+                    'URM': {"alpha": urm_alpha},
+                    'ICM': {"alpha": icm_alpha}
+                }
             )
 
         result = evaluator_validation.evaluateRecommender(recommenders)
@@ -65,15 +78,27 @@ if __name__ == '__main__':
 
     optimizer.maximize(
         init_points=10,
-        n_iter=40
+        n_iter=20
     )
 
-    alpha = optimizer.max["params"]["alpha"]
+    urm_alpha = optimizer.max["params"]["urm_alpha"]
+    icm_alpha = optimizer.max["params"]["icm_alpha"]
     factors = optimizer.max["params"]["factors"]
-    iterations = optimizer.max["params"]["iterations"]
+    epochs = optimizer.max["params"]["epochs"]
 
-    recommender_IALS = ImplicitALSRecommender(URM_train_init)
-    recommender_IALS.fit(factors=int(factors), alpha=alpha, regularization=0.01, iterations=int(iterations))
+
+    recommender_IALS = FeatureCombinedImplicitALSRecommender(URM_train=URM_train_init,ICM_train=ICM,verbose=True)
+    recommender_IALS.fit(
+                factors=int(factors),
+                regularization=0.01,
+                use_gpu=False,
+                iterations=int(epochs),
+                num_threads=4,
+                confidence_scaling=linear_scaling_confidence,
+                **{
+                    'URM': {"alpha": urm_alpha},
+                    'ICM': {"alpha": icm_alpha}
+                })
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)

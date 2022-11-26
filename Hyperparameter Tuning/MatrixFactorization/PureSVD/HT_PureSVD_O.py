@@ -4,13 +4,28 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDItemRecommender
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURM
     import json
     import optuna as op
+    from datetime import datetime
+    import csv
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createBumpURM()
+    URM = createURM()
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Creating CSV header
+
+    header = ['recommender', 'topK', 'num_factors', 'MAP']
+
+    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+
+    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
+        writer = csv.writer(f)
+
+        # write the header
+        writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -19,7 +34,7 @@ if __name__ == '__main__':
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(2):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -35,31 +50,27 @@ if __name__ == '__main__':
 
         recommender_PureSVD_list = []
 
-        """ Max Intervals:
-        topk: [10, 1000]
-        shrink: [10, 1000]
-        similarity: ['cosine', 'pearson', 'jaccard', 'tanimoto', 'adjusted', 'euclidean']
-        feature_weighting: ["BM25", "TF-IDF", "none"]
-        """
-
         topK = trial.suggest_int("topK", 10, 500)
         num_factors = trial.suggest_int("num_factors", 200, 400)
-        #similarity = trial.suggest_categorical("similarity", ['cosine', 'pearson', 'jaccard', 'tanimoto', 'adjusted', 'euclidean'])
-        #feature_weighting = trial.suggest_categorical("feature_weighting", ["BM25", "TF-IDF", "none"])
 
         for index in range(len(URM_train_list)):
 
             recommender_PureSVD_list.append(PureSVDItemRecommender(URM_train_list[index], verbose=False))
             recommender_PureSVD_list[index].fit(num_factors=num_factors, topK=topK)
-            recommender_PureSVD_list[index].URM_Train = URM_train_list[index]
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_PureSVD_list)
         MAP_results_list.append(MAP_result)
 
+        resultsToPrint = [recommender_PureSVD_list[0].RECOMMENDER_NAME, topK, num_factors, sum(MAP_result) / len(MAP_result)]
+
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(resultsToPrint)
+
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=30)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log

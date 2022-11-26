@@ -19,7 +19,6 @@ if __name__ == '__main__':
     # Creating CSV header
 
     header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
-
     partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:

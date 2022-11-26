@@ -1,6 +1,6 @@
 import implicit
 from ..BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
-#from src.Utils.ICM_preprocessing import *
+from Utils.combine_matrix import combine
 
 
 class FeatureCombinedImplicitALSRecommender(BaseMatrixFactorizationRecommender):
