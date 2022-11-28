@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta', 'topK', 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'topK', 'gamma', 'MAP']
     partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         alpha = trial.suggest_float("alpha", 0.1, 0.9)
         beta = trial.suggest_float("beta", 0.1, 0.9)
         topK = trial.suggest_int("topK", 100, 500)
-        gamma = trial.suggest_int("gamma", 1, 100)
+        gamma = trial.suggest_int("gamma", 10, 100)
 
         for index in range(len(URM_train_list)):
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         MAP_result = evaluator_validation.evaluateRecommender(recommender_RP3beta_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_RP3beta_list[0].RECOMMENDER_NAME, alpha, beta, topK, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = [recommender_RP3beta_list[0].RECOMMENDER_NAME, alpha, beta, topK, gamma, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
