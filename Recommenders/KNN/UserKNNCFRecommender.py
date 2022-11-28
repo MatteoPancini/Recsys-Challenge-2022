@@ -28,7 +28,6 @@ class UserKNNCFRecommender(BaseUserSimilarityMatrixRecommender):
 
 
     def fit(self, topK=50, shrink=100, similarity='cosine', normalize=True, feature_weighting = "none", URM_bias = False, **similarity_args):
-
         self.topK = topK
         self.shrink = shrink
 
