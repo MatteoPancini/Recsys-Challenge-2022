@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Utils.recsys2022DataReader import createBumpURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     from optuna.samplers import TPESampler
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     ItemKNNCF_recommender.fit(topK=329, shrink=97)
     SLIM_recommender.fit(topK=362, alpha=0.06747829810332745, l1_ratio=0.0005493724398243842)
 
-    recommender = LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=ItemKNNCF_recommender, Recommender_2=SLIM_recommender)
+    recommender = LinearHybridTwoRecommenderNoVariables(URM_train, Recommender_1=ItemKNNCF_recommender, Recommender_2=SLIM_recommender)
     recommender.fit(alpha=0.2)
 
     result, _ = evaluator_test.evaluateRecommender(recommender)

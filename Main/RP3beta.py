@@ -2,7 +2,6 @@ if __name__ == '__main__':
 
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Utils.recsys2022DataReader import createURM
-    import pandas as pd
     from Utils.writeSubmission import write_submission
 
     # Loading URM

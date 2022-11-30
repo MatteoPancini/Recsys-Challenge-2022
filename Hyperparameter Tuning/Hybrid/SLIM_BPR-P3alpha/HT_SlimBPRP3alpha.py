@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIM_BPR_Python import SLIM_BPR_Python
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     from Utils.recsys2022DataReader import *
 
     # ---------------------------------------------------------------------------------------------------------
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     recommender_SLIMBPR = SLIM_BPR_Python(URM_train)
     recommender_SLIMBPR.fit(topK=45, lambda_j=1e-05, lambda_i=1e-05, epochs=75)
 
-    hybridRecommender = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train,
-                                                               Recommender_1=recommender_P3alpha,
-                                                               Recommender_2=recommender_SLIMBPR)
+    hybridRecommender = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train,
+                                                              Recommender_1=recommender_P3alpha,
+                                                              Recommender_2=recommender_SLIMBPR)
 
     def objective(trial):
 
@@ -101,6 +101,7 @@ if __name__ == "__main__":
     # Writing hyperparameter into a log
 
     alpha = study.best_params['alpha']
+
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(hybridRecommender)
 

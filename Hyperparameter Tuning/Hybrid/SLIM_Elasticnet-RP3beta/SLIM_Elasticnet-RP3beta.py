@@ -7,7 +7,7 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     import optuna as op
     import json
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
             recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
             recommender_RP3beta_list[index].fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
 
-            recommender_Hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_SlimElasticnet_list[index], Recommender_2=recommender_RP3beta_list[index]))
+            recommender_Hybrid_list.append(LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_SlimElasticnet_list[index], Recommender_2=recommender_RP3beta_list[index]))
             recommender_Hybrid_list[index].fit(alpha=alpha)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_Hybrid_list)
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     recommender_RP3beta = RP3betaRecommender(URM_train_init)
     recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
 
-    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
+    recommender_Hybrid = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_init, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
     recommender_Hybrid.fit(alpha=alpha)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])

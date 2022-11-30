@@ -8,7 +8,7 @@ if __name__ == '__main__':
     from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridThreeRecommender
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridThreeRecommenderThreeVariables
     import optuna as op
     import json
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             recommender_ItemKNNCBF_list.append(ItemKNNCBFRecommender(URM_train_list[index], ICM_train=ICM))
             recommender_ItemKNNCBF_list[index].fit(shrink=20.842705935575843, topK=498)
 
-            recommender_Hybrid_list.append(LinearHybridThreeRecommender(URM_train=URM_train_list[index], Recommender_1=recommender_SlimBPR_list[index], Recommender_2=recommender_RP3beta_list[index], Recommender_3=recommender_ItemKNNCBF_list[index]))
+            recommender_Hybrid_list.append(LinearHybridThreeRecommenderThreeVariables(URM_train=URM_train_list[index], Recommender_1=recommender_SlimBPR_list[index], Recommender_2=recommender_RP3beta_list[index], Recommender_3=recommender_ItemKNNCBF_list[index]))
             recommender_Hybrid_list[index].fit(alpha=alpha, beta=beta, gamma=gamma)
 
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     recommender_ItemKNNCBF = ItemKNNCBFRecommender(URM_train_init, ICM)
     recommender_ItemKNNCBF.fit(shrink=20.842705935575843, topK=498)
 
-    recommender_Hybrid = LinearHybridThreeRecommender(URM_train= URM_train_init, Recommender_1=recommender_SlimBPR,Recommender_2=recommender_RP3beta, Recommender_3=recommender_ItemKNNCBF)
+    recommender_Hybrid = LinearHybridThreeRecommenderThreeVariables(URM_train= URM_train_init, Recommender_1=recommender_SlimBPR, Recommender_2=recommender_RP3beta, Recommender_3=recommender_ItemKNNCBF)
     recommender_Hybrid.fit(alpha=alpha, beta=beta, gamma=gamma)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
