@@ -23,6 +23,9 @@ class IALSRecommender_implicit(BaseMatrixFactorizationRecommender):
     This is Alternating Least Squares.
     """
 
+    RECOMMENDER_NAME = "ImplicitALSRecommender"
+
+
     def __init__(self, URM_train, verbose=True):
         super(IALSRecommender_implicit, self).__init__(URM_train, verbose=verbose)
 
@@ -31,7 +34,8 @@ class IALSRecommender_implicit(BaseMatrixFactorizationRecommender):
         self.regularization = regularization
         self.iterations = iterations
 
-        sparse_item_user = self.URM_train.T
+        #sparse_item_user = self.URM_train.T
+        sparse_item_user = self.URM_train
 
         # Initialize the als model and fit it using the sparse item-user matrix
         model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization,

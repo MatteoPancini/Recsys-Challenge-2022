@@ -2,30 +2,25 @@ if __name__ == "__main__":
 
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import *
+    from Utils.recsys2022DataReader import createURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
     import optuna as op
-    import scipy.sparse as sps
-    import similaripy
+    import numpy as np
     import csv
 
     # ---------------------------------------------------------------------------------------------------------
-    # Loading URM & ICM
+    # Loading URM
     URM = createURM()
-
-    ICM = createSmallICM()
-
-    ICM = similaripy.normalization.bm25plus(ICM.copy())
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'topK', 'alpha', 'l1_ration', 'ICMweight', 'MAP']
+    header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
 
-    partialsFile = 'Combinedpartials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'SlimElasticNet_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -33,6 +28,31 @@ if __name__ == "__main__":
         # write the header
         writer.writerow(header)
 
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Profiling
+
+    group_id = 0
+
+    profile_length = np.ediff1d(URM.indptr)
+
+    sorted_users = np.argsort(profile_length)
+
+    interactions = []
+    for i in range(41629):
+        interactions.append(len(URM[i, :].nonzero()[0]))
+
+    list_group_interactions = [[0, 19], [20, 39], [40, 69], [70, max(interactions)]]
+
+    lower_bound = list_group_interactions[group_id][0]
+    higher_bound = list_group_interactions[group_id][1]
+
+    users_in_group = [user_id for user_id in range(len(interactions)) if
+                      (lower_bound <= interactions[user_id] <= higher_bound)]
+    users_in_group_p_len = profile_length[users_in_group]
+
+    users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+    users_not_in_group = sorted_users[users_not_in_group_flag]
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -47,13 +67,10 @@ if __name__ == "__main__":
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
-
-    CombinedURMs = []
-    for URM in URM_train_list:
-        CombinedURMs.append(sps.vstack([URM, ICM.T]))
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False, ignore_users_list=users_not_in_group)
 
     MAP_results_list = []
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
@@ -63,21 +80,18 @@ if __name__ == "__main__":
         recommender_SlimElasticnet_list = []
 
         topK = trial.suggest_int("topK", 100, 500)
-        alpha = trial.suggest_float("alpha", 1e-5, 0.1)
-        l1_ratio = trial.suggest_float("l1_ratio", 1e-5, 0.1)
-        ICMweight = trial.suggest_int("icm_weight", 1, 100)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        l1_ratio = trial.suggest_float("l1_ratio", 0, 1)
 
         for index in range(len(URM_train_list)):
 
-            CombinedURM = sps.vstack([URM_train_list[index], (ICM * ICMweight).T])
-            recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(CombinedURM))
+            recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
             recommender_SlimElasticnet_list[index].fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_SlimElasticnet_list[0].RECOMMENDER_NAME, topK, alpha, l1_ratio, ICMweight,
-                          sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = [recommender_SlimElasticnet_list[0].RECOMMENDER_NAME, alpha, l1_ratio, topK, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -95,14 +109,11 @@ if __name__ == "__main__":
     topK = study.best_params["topK"]
     alpha = study.best_params["alpha"]
     l1_ratio = study.best_params["l1_ratio"]
-    ICMweight = study.best_params("icm_weight")
 
-    CombinedURM = sps.vstack([URM_train_init, (ICM * ICMweight).T])
-
-    recommender_SlimElasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(CombinedURM)
+    recommender_SlimElasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)
     recommender_SlimElasticnet.fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
-    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
+    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_SlimElasticnet)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -111,7 +122,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/Combined" + recommender_SlimElasticnet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/" + recommender_SlimElasticnet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

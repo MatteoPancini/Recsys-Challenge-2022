@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     from Utils.recsys2022DataReader import *
 
     # ---------------------------------------------------------------------------------------------------------
@@ -55,8 +55,8 @@ if __name__ == "__main__":
         alpha = trial.suggest_float("alpha", 0, 1)
 
         for index in range(len(URM_train_list)):
-            hybridRecommender = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_SLIMElasticNet_list[index],
-                                                                       Recommender_2=recommender_P3alpha_list[index])
+            hybridRecommender = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_SLIMElasticNet_list[index],
+                                                                      Recommender_2=recommender_P3alpha_list[index])
 
             hybridRecommender.fit(alpha=alpha)
 

@@ -15,7 +15,7 @@ class K_Fold_Evaluator_MAP(Evaluator):
 
         self.evaluator_list = []
 
-        if ignore_users_list == None:
+        if ignore_users_list is None:
             ignore_users_list = [None]*len(URM_test_list)
 
         for index in range(len(URM_test_list)):
@@ -28,7 +28,7 @@ class K_Fold_Evaluator_MAP(Evaluator):
                     exclude_seen=exclude_seen,
                     diversity_object=diversity_object,
                     ignore_items=ignore_items,
-                    ignore_users=ignore_users_list[index],
+                    ignore_users=ignore_users_list,
                     verbose=verbose
                 )
             )

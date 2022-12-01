@@ -17,7 +17,7 @@ class ItemKNNCFRecommender(BaseItemSimilarityMatrixRecommender):
     def __init__(self, URM_train, verbose=True):
         super(ItemKNNCFRecommender, self).__init__(URM_train, verbose=verbose)
 
-    def fit(self, ICM,  topK=50, shrink=100, similarity='cosine', normalization="none", feature_weighting="none",
+    def fit(self, ICM,  topK=50, shrink=100, similarity='cosine', normalization="none",
             **similarity_args):
 
         self.topK = topK
@@ -32,8 +32,7 @@ class ItemKNNCFRecommender(BaseItemSimilarityMatrixRecommender):
         if normalization == "bm25plus":
             self.URM_train = similaripy.normalization.bm25plus(self.URM_train, axis=1)
 
-        #matrix = sps.hstack((self.URM_train.transpose().tocsr(), ICM))
-        matrix = self.URM_train.transpose().tocsr()
+        matrix = sps.hstack((self.URM_train.transpose().tocsr(), ICM))
 
         if similarity == "cosine":
             similarity_matrix = similaripy.cosine(matrix, k=self.topK, shrink=self.shrink, binary=False, threshold=0)

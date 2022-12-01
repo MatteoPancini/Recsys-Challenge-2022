@@ -7,7 +7,7 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     import optuna as op
     import json
     import csv
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
             recommender_RP3beta_list[index].fit(alpha=0.2723304259820941, beta=0.34952850616150266, topK=78)
 
-            recommender_Hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_IALS_list[index], Recommender_2=recommender_RP3beta_list[index]))
+            recommender_Hybrid_list.append(LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_list[index], Recommender_1=recommender_IALS_list[index], Recommender_2=recommender_RP3beta_list[index]))
             recommender_Hybrid_list[index].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_Hybrid_list)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     recommender_RP3beta = RP3betaRecommender(URM_train_init)
     recommender_RP3beta.fit(alpha=0.2723304259820941, beta=0.34952850616150266, topK=78)
 
-    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_IALS, Recommender_2=recommender_RP3beta)
+    recommender_Hybrid = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_init, Recommender_1=recommender_IALS, Recommender_2=recommender_RP3beta)
     recommender_Hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
