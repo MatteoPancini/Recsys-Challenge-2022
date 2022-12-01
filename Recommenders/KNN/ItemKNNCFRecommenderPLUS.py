@@ -32,14 +32,8 @@ class ItemKNNCFRecommender(BaseItemSimilarityMatrixRecommender):
         if normalization == "bm25plus":
             self.URM_train = similaripy.normalization.bm25plus(self.URM_train, axis=1)
 
-        if feature_weighting == "bm25":
-            ICM = similaripy.normalization.bm25(ICM, axis=1)
-        if feature_weighting == "tfidf":
-            ICM = similaripy.normalization.tfidf(ICM, axis=1)
-        if feature_weighting == "bm25plus":
-            ICM = similaripy.normalization.bm25plus(ICM, axis=1)
-
-        matrix = sps.hstack((self.URM_train.transpose().tocsr(), ICM))
+        #matrix = sps.hstack((self.URM_train.transpose().tocsr(), ICM))
+        matrix = self.URM_train.transpose().tocsr()
 
         if similarity == "cosine":
             similarity_matrix = similaripy.cosine(matrix, k=self.topK, shrink=self.shrink, binary=False, threshold=0)

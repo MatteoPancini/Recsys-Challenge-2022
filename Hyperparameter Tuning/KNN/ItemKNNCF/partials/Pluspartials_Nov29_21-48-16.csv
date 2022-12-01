@@ -1,0 +1,4 @@
+recommender,shrink,topk,similarity,normalization,ICMweight,MAP
+ItemKNNCFRecommender,176.22496149307037,259,cosine,bm25plus,85,2.7938892803799124e-05
+ItemKNNCFRecommender,112.50351775320964,272,cosine,tfidf,68,2.8393856449387166e-05
+ItemKNNCFRecommender,54.0498366012713,389,dice,tfidf,80,2.69554908316494e-05
