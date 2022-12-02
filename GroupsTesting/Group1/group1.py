@@ -16,8 +16,6 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
 
-
-
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM + ICM
 
@@ -30,29 +28,32 @@ if __name__ == "__main__":
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Fitting of recommenders
 
     recommender_object_dict = {}
 
-    '''
-    # IALS
+    # IASL
     IASL = ImplicitALSRecommender(URM_train)
     IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
-    recommender_object_dict['IALS'] = IASL
+    recommender_object_dict['IASL'] = IASL
 
-    '''
-    # SLIM BPR
-    SlimBPR = SLIM_BPR_Python(URM_train)
-    SlimBPR.fit(topK=45, epochs=75, lambda_j=1e-05, lambda_i=1e-05)
-    recommender_object_dict['SlimBPR'] = SlimBPR
-    '''
+    # ItemKNNCF
+    ItemKNNCF = ItemKNNCFRecommender(URM_train)
+    ItemKNNCF.fit(ICM, shrink=1665.2431108249625, topK=3228, similarity='dice',
+                                   normalization='bm25')
+    recommender_object_dict['ItemKNNCF'] = ItemKNNCF
+
+    # RP3beta
+    RP3beta = RP3betaRecommender(URM_train)
+    RP3beta.fit(alpha=0.5126756776495514, beta=0.396119587486951, topK=100)
+    recommender_object_dict['RP3Beta'] = RP3beta
+
     # P3alpha
     P3alpha = P3alphaRecommender(URM_train)
     P3alpha.fit(topK=218, alpha=0.8561168568686058)
     recommender_object_dict['P3Alpha'] = P3alpha
-    
+
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
@@ -69,31 +70,20 @@ if __name__ == "__main__":
                                                                 recommender_RP3beta)
     recommender_hybrid.fit(alpha=0.26672657848316894, beta=1.8325046917533472)
     recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid
-    '''
-    # ItemKNNCF
+
+
+    # ItemKNNCF Group 0
     ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
     ItemKNNCFG0.fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',
                   normalization='bm25plus')
-    recommender_object_dict['CombinedItemKNNCFG0'] = ItemKNNCFG0
-
-    # RP3beta
-    RP3betaG0 = RP3betaRecommender(URM_train)
-    RP3betaG0.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
-    recommender_object_dict['RP3betaG0'] = RP3betaG0
-
-    # SLIM BPR
-    SlimBPRG0 = SLIM_BPR_Python(URM_train)
-    SlimBPRG0.fit(topK=4439, epochs=85, lambda_j=0.002175177631903779, lambda_i=0.004642005196062006)
-    recommender_object_dict['SlimBPRG0'] = SlimBPRG0
-
-
+    recommender_object_dict['ItemKNNCFG0'] = ItemKNNCFG0
 
     # ---------------------------------------------------------------------------------------------------------
     # Evaluation of recommenders based on group
 
     MAP_recommender_per_group = {}
 
-    group_id = 0
+    group_id = 1
 
     cutoff = 10
 
@@ -129,9 +119,8 @@ if __name__ == "__main__":
     for label, recommender in recommender_object_dict.items():
         results = MAP_recommender_per_group[label]
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 0')
+    plt.title('User Group 1')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
     plt.show()
-

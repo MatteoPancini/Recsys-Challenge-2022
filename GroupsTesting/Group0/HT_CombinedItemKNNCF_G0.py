@@ -39,19 +39,15 @@ if __name__ == '__main__':
 
     profile_length = np.ediff1d(URM.indptr)
 
+    block_size = int(len(profile_length) * 0.25)
+
     sorted_users = np.argsort(profile_length)
 
-    interactions = []
-    for i in range(41629):
-        interactions.append(len(URM[i, :].nonzero()[0]))
+    start_pos = group_id * block_size
+    end_pos = min((group_id + 1) * block_size, len(profile_length))
 
-    list_group_interactions = [[0, 19], [20, 39], [40, 69], [70, max(interactions)]]
+    users_in_group = sorted_users[start_pos:end_pos]
 
-    lower_bound = list_group_interactions[group_id][0]
-    higher_bound = list_group_interactions[group_id][1]
-
-    users_in_group = [user_id for user_id in range(len(interactions)) if
-                      (lower_bound <= interactions[user_id] <= higher_bound)]
     users_in_group_p_len = profile_length[users_in_group]
 
     users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
@@ -64,15 +60,33 @@ if __name__ == '__main__':
 
     URM_train_list = []
     URM_validation_list = []
+    users_not_in_group_list = []
 
     for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False, ignore_users_list=users_not_in_group)
+        profile_length = np.ediff1d(URM_train.indptr)
+
+        block_size = int(len(profile_length) * 0.25)
+
+        sorted_users = np.argsort(profile_length)
+
+        start_pos = group_id * block_size
+        end_pos = min((group_id + 1) * block_size, len(profile_length))
+
+        users_in_group = sorted_users[start_pos:end_pos]
+
+        users_in_group_p_len = profile_length[users_in_group]
+
+        users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+        users_not_in_group_list.append(sorted_users[users_not_in_group_flag])
+
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False, ignore_users_list=users_not_in_group_list)
 
     MAP_results_list = []
+
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
@@ -96,7 +110,7 @@ if __name__ == '__main__':
 
         resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, normalization, sum(MAP_result) / len(MAP_result)]
 
-        with open('partials/Combined' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
             writer.writerow(resultsToPrint)
 
@@ -104,7 +118,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=15)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -126,7 +140,7 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_ItemKNNCF.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/Combined" + recommender_ItemKNNCF.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
