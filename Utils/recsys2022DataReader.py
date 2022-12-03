@@ -161,12 +161,12 @@ def createSmallICM():
     lenght = lenght.drop(columns=['feature_id'], axis=1)
     lenght = lenght.rename(columns={'data': 'numberOfEpisodes'})
 
-    lenghtFiltered = lenght[lenght['item_id'] <= 24506]
+    """lenghtFiltered = lenght[lenght['item_id'] <= 24506]
     lenghtArray = lenghtFiltered['numberOfEpisodes'].to_numpy()
     itemsID = typesFiltered['item_id'].to_numpy()
 
     for x in range(len(itemsID)):
-        ICM[itemsID[x]][1] = lenghtArray[x]
+        ICM[itemsID[x]][1] = lenghtArray[x]"""
 
     ICM = sp.csr_matrix(ICM)
 

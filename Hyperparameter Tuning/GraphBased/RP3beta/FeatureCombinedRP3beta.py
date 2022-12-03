@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta', 'topK', 'gamma', 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'topK', 'MAP']
     partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
@@ -38,8 +38,6 @@ if __name__ == '__main__':
     cross_validator = CrossKValidator(URM_train_init, k=3)
     evaluator_validation, URM_train_list, URM_validation_list = cross_validator.create_k_evaluators()
 
-    #URMs_stack_list = combineKFold(URM_train_list, ICM)
-
     MAP_results_list = []
 
     # ---------------------------------------------------------------------------------------------------------
@@ -52,11 +50,10 @@ if __name__ == '__main__':
         alpha = trial.suggest_float("alpha", 0.1, 0.9)
         beta = trial.suggest_float("beta", 0.1, 0.9)
         topK = trial.suggest_int("topK", 100, 500)
-        gamma = trial.suggest_int("gamma", 10, 100)
 
         for index in range(len(URM_train_list)):
 
-            URM_stack = combine(URM_train_list[index], gamma * ICM)
+            URM_stack = combine(URM_train_list[index], ICM)
 
             recommender_RP3beta_list.append(RP3betaRecommender(URM_stack, verbose=False))
             recommender_RP3beta_list[index].fit(alpha=alpha, topK=topK, beta=beta)
@@ -65,7 +62,7 @@ if __name__ == '__main__':
         MAP_result = evaluator_validation.evaluateRecommender(recommender_RP3beta_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_RP3beta_list[0].RECOMMENDER_NAME, alpha, beta, topK, gamma, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = [recommender_RP3beta_list[0].RECOMMENDER_NAME, alpha, beta, topK, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -83,9 +80,8 @@ if __name__ == '__main__':
     topK = study.best_params['topK']
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
-    gamma = study.best_params['gamma']
 
-    URM_final_test = combine(URM_train_init, ICM * gamma)
+    URM_final_test = combine(URM_train_init, ICM)
     recommender_RP3beta = RP3betaRecommender(URM_final_test, verbose=False)
     recommender_RP3beta.fit(alpha=alpha, topK=topK, beta=beta)
 
@@ -98,6 +94,6 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_RP3beta.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime('%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+    with open("logs/" + "FeatureCombinedRP3beta" + "_logs_" + datetime.now().strftime('%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
