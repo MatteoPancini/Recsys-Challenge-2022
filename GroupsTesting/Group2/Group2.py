@@ -8,9 +8,7 @@ if __name__ == "__main__":
     from Recommenders.SLIM.SLIM_BPR_Python import SLIM_BPR_Python
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-    from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
 
@@ -35,12 +33,12 @@ if __name__ == "__main__":
     IASL = ImplicitALSRecommender(URM_train)
     IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
     recommender_object_dict['IALS'] = IASL
-
+    """
     # SLIM BPR
     SlimBPR = SLIM_BPR_Python(URM_train)
     SlimBPR.fit(topK=45, epochs=75, lambda_j=1e-05, lambda_i=1e-05)
     recommender_object_dict['SlimBPR'] = SlimBPR
-    """
+    
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
@@ -48,13 +46,13 @@ if __name__ == "__main__":
 
     # ItemKNNCF
     ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG2.fit(ICM, shrink=10.253981267190092, topK=390, similarity='rp3beta',
+    ItemKNNCFG2.fit(ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta',
                     normalization='tfidf')
     recommender_object_dict['CombinedItemKNNCFG2'] = ItemKNNCFG2
 
     # RP3beta
     RP3betaG2 = RP3betaRecommender(URM_train)
-    RP3betaG2.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
+    RP3betaG2.fit(alpha=0.6687877652632948, beta=0.3841332145259308, topK=103)
     recommender_object_dict['RP3betaG2'] = RP3betaG2
 
     # ---------------------------------------------------------------------------------------------------------
