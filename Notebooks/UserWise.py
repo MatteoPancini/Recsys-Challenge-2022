@@ -61,7 +61,7 @@ if __name__ == "__main__":
     P3alpha = P3alphaRecommender(URM_train)
     P3alpha.fit(topK=218, alpha=0.8561168568686058)
     recommender_object_dict['P3Alpha'] = P3alpha
-    '''
+
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
                                                                 recommender_RP3beta)
     recommender_hybrid.fit(alpha=0.26672657848316894, beta=1.8325046917533472)
     recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid
-    '''
+
     # ItemKNNCF Group 0
     ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
     ItemKNNCFG0.fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',

@@ -7,7 +7,7 @@ if __name__ == "__main__":
         split_train_in_two_percentage_global_sample
     from Utils.recsys2022DataReader import *
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
-    from Recommenders.SLIM.SLIM_BPR_Python import SLIM_BPR_Python
+    from Recommenders.NonPersonalizedRecommender import TopPop
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
@@ -15,6 +15,10 @@ if __name__ == "__main__":
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
+    import json
+    from datetime import datetime
+
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM + ICM
@@ -28,6 +32,7 @@ if __name__ == "__main__":
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
+
     # ---------------------------------------------------------------------------------------------------------
     # Fitting of recommenders
 
@@ -38,10 +43,15 @@ if __name__ == "__main__":
     IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
     recommender_object_dict['IASL'] = IASL
 
+    # TopPop
+    TopPop = TopPop(URM_train)
+    TopPop.fit()
+    recommender_object_dict['TopPop'] = TopPop
+
     # ItemKNNCF
     ItemKNNCF = ItemKNNCFRecommender(URM_train)
     ItemKNNCF.fit(ICM, shrink=1665.2431108249625, topK=3228, similarity='dice',
-                                   normalization='bm25')
+                  normalization='bm25')
     recommender_object_dict['ItemKNNCF'] = ItemKNNCF
 
     # RP3beta
@@ -58,7 +68,7 @@ if __name__ == "__main__":
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
     recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
-    
+
     # P3alpha + RP3beta
     recommender_P3alpha = P3alphaRecommender(URM_train)
     recommender_P3alpha.fit(topK=218, alpha=0.8561168568686058)
@@ -71,6 +81,8 @@ if __name__ == "__main__":
     recommender_hybrid.fit(alpha=0.26672657848316894, beta=1.8325046917533472)
     recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid
 
+    # ------------------------
+    # Group 0
 
     # ItemKNNCF Group 0
     ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
@@ -78,14 +90,18 @@ if __name__ == "__main__":
                   normalization='bm25plus')
     recommender_object_dict['ItemKNNCFG0'] = ItemKNNCFG0
 
+    # ------------------------
+    # Group 1
+
+    # ------------------------
+    # Group 2
+
+    # ------------------------
+    # Group 3
+
+
     # ---------------------------------------------------------------------------------------------------------
-    # Evaluation of recommenders based on group
-
-    MAP_recommender_per_group = {}
-
-    group_id = 1
-
-    cutoff = 10
+    # Profiling
 
     profile_length = np.ediff1d(URM.indptr)
 
@@ -93,34 +109,66 @@ if __name__ == "__main__":
 
     sorted_users = np.argsort(profile_length)
 
-    start_pos = group_id * block_size
-    end_pos = min((group_id + 1) * block_size, len(profile_length))
+    for group_id in range(0, 4):
+        start_pos = group_id * block_size
+        end_pos = min((group_id + 1) * block_size, len(profile_length))
 
-    users_in_group = sorted_users[start_pos:end_pos]
+        users_in_group = sorted_users[start_pos:end_pos]
 
-    users_in_group_p_len = profile_length[users_in_group]
+        users_in_group_p_len = profile_length[users_in_group]
 
-    users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
-    users_not_in_group = sorted_users[users_not_in_group_flag]
-
-    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[cutoff], ignore_users=users_not_in_group)
-
-    for label, recommender in recommender_object_dict.items():
-        result_df, _ = evaluator_test.evaluateRecommender(recommender)
-        if label in MAP_recommender_per_group:
-            MAP_recommender_per_group[label].append(result_df.loc[cutoff]["MAP"])
-        else:
-            MAP_recommender_per_group[label] = [result_df.loc[cutoff]["MAP"]]
+        print("Group {}, #users in group {}, average p.len {:.2f}, median {}, min {}, max {}".format(
+            group_id,
+            users_in_group.shape[0],
+            users_in_group_p_len.mean(),
+            np.median(users_in_group_p_len),
+            users_in_group_p_len.min(),
+            users_in_group_p_len.max()))
 
     # ---------------------------------------------------------------------------------------------------------
-    # Plot
+    # Evaluation of recommenders based on group
 
+    MAP_recommender_per_group = {}
+
+    cutoff = 10
+
+    for group_id in range(0, 4):
+        start_pos = group_id * block_size
+        end_pos = min((group_id + 1) * block_size, len(profile_length))
+
+        users_in_group = sorted_users[start_pos:end_pos]
+
+        users_in_group_p_len = profile_length[users_in_group]
+
+        users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+        users_not_in_group = sorted_users[users_not_in_group_flag]
+
+        evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[cutoff], ignore_users=users_not_in_group)
+
+        for label, recommender in recommender_object_dict.items():
+            result_df, _ = evaluator_test.evaluateRecommender(recommender)
+            if label in MAP_recommender_per_group:
+                MAP_recommender_per_group[label].append(result_df.loc[cutoff]["MAP"])
+            else:
+                MAP_recommender_per_group[label] = [result_df.loc[cutoff]["MAP"]]
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Plot and save
+
+
+    finalResults = {}
     _ = plt.figure(figsize=(16, 9))
     for label, recommender in recommender_object_dict.items():
         results = MAP_recommender_per_group[label]
-        plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 1')
+        finalResults[label] = results
+        plt.scatter(x=np.arange(0, len(results)), y=results, label=label)
     plt.ylabel('MAP')
-    plt.xlabel('Recommenders')
+    plt.xlabel('User Group')
     plt.legend()
     plt.show()
+
+    with open("logs/Group1_logs_" + datetime.now().strftime(
+            '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+        json.dump(finalResults, json_file, indent=4)
+
+

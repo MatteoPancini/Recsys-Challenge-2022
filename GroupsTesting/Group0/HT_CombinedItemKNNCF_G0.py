@@ -18,6 +18,9 @@ if __name__ == '__main__':
 
     ICM = createSmallICM()
 
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+
+
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
@@ -37,7 +40,7 @@ if __name__ == '__main__':
 
     group_id = 0
 
-    profile_length = np.ediff1d(URM.indptr)
+    profile_length = np.ediff1d(URM_train_init.indptr)
 
     block_size = int(len(profile_length) * 0.25)
 
@@ -56,7 +59,6 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
     URM_train_list = []
     URM_validation_list = []
