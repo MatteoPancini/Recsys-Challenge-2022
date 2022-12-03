@@ -13,6 +13,7 @@ if __name__ == "__main__":
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
+    from datetime import datetime
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM + ICM
@@ -94,13 +95,21 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Plot
 
+
+    finalResults = {}
     _ = plt.figure(figsize=(16, 9))
     for label, recommender in recommender_object_dict.items():
         results = MAP_recommender_per_group[label]
+        finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 0')
+    plt.title('User Group 2')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
     plt.show()
+
+
+    with open("logs/Group2_logs_" + datetime.now().strftime(
+            '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+        json.dump(finalResults, json_file, indent=4)
 
