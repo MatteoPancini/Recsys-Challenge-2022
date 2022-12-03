@@ -15,6 +15,8 @@ if __name__ == "__main__":
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
+    from datetime import datetime
+    import json
 
 
 
@@ -36,13 +38,6 @@ if __name__ == "__main__":
 
     recommender_object_dict = {}
 
-    '''
-    # IALS
-    IASL = ImplicitALSRecommender(URM_train)
-    IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
-    recommender_object_dict['IALS'] = IASL
-
-    '''
     # SLIM BPR
     SlimBPR = SLIM_BPR_Python(URM_train)
     SlimBPR.fit(topK=45, epochs=75, lambda_j=1e-05, lambda_i=1e-05)
@@ -123,15 +118,21 @@ if __name__ == "__main__":
             MAP_recommender_per_group[label] = [result_df.loc[cutoff]["MAP"]]
 
     # ---------------------------------------------------------------------------------------------------------
-    # Plot
+    # Plot and save
 
+    finalResults = {}
     _ = plt.figure(figsize=(16, 9))
     for label, recommender in recommender_object_dict.items():
         results = MAP_recommender_per_group[label]
+        finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
     plt.title('User Group 0')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
     plt.show()
+
+    with open("logs/Group1_logs_" + datetime.now().strftime(
+            '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
+        json.dump(finalResults, json_file, indent=4)
 
