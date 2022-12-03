@@ -66,14 +66,12 @@ if __name__ == '__main__':
         profile_length = np.ediff1d(URM_train.indptr)
 
         block_size = int(len(profile_length) * 0.25)
-
         sorted_users = np.argsort(profile_length)
 
         start_pos = group_id * block_size
         end_pos = min((group_id + 1) * block_size, len(profile_length))
 
         users_in_group = sorted_users[start_pos:end_pos]
-
         users_in_group_p_len = profile_length[users_in_group]
 
         users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
@@ -92,7 +90,7 @@ if __name__ == '__main__':
 
         topK = trial.suggest_int("topK", 100, 500)
         shrink = trial.suggest_float("shrink", 10, 200)
-        similarity = 'rp3beta'
+        similarity = trial.suggest_categorical("similarity", ["cosine", "dice", "rp3beta"])
         normalization = trial.suggest_categorical("normalization", ["bm25", "tfidf", "bm25plus"])
 
         for index in range(len(URM_train_list)):
@@ -121,7 +119,7 @@ if __name__ == '__main__':
 
     topK = study.best_params['topK']
     shrink = study.best_params['shrink']
-    similarity = 'rp3beta'
+    similarity = study.best_params['similarity']
     normalization = study.best_params['normalization']
 
     recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init, verbose=False)
