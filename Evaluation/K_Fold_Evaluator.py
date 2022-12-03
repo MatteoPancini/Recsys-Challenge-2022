@@ -28,7 +28,7 @@ class K_Fold_Evaluator_MAP(Evaluator):
                     exclude_seen=exclude_seen,
                     diversity_object=diversity_object,
                     ignore_items=ignore_items,
-                    ignore_users=ignore_users_list,
+                    ignore_users=ignore_users_list[index],
                     verbose=verbose
                 )
             )
