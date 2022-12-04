@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 2
+    group_id = 3
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     block_size = int(len(profile_length) * 0.25)

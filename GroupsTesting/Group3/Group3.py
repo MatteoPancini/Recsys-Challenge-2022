@@ -18,7 +18,6 @@ if __name__ == "__main__":
     # Loading URM + ICM
 
     URM = createURM()
-
     ICM = createSmallICM()
 
     # ---------------------------------------------------------------------------------------------------------
@@ -36,11 +35,6 @@ if __name__ == "__main__":
     IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
     recommender_object_dict['IALS'] = IASL
 
-    # SLIM BPR
-    SlimBPR = SLIM_BPR_Python(URM_train)
-    SlimBPR.fit(topK=102, epochs=99, lambda_j=0.007813058556030521, lambda_i=0.0037653107498663617)
-    recommender_object_dict['SlimBPR'] = SlimBPR
-
     """
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
@@ -50,13 +44,13 @@ if __name__ == "__main__":
 
     # ItemKNNCF
     ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG2.fit(ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta',
-                    normalization='tfidf')
+    ItemKNNCFG2.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice',
+                    normalization='bm25')
     recommender_object_dict['CombinedItemKNNCFG2'] = ItemKNNCFG2
 
     # RP3beta
     RP3betaG2 = RP3betaRecommender(URM_train)
-    RP3betaG2.fit(alpha=0.6687877652632948, beta=0.3841332145259308, topK=103)
+    RP3betaG2.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
     recommender_object_dict['RP3betaG2'] = RP3betaG2
 
     # ---------------------------------------------------------------------------------------------------------
@@ -64,7 +58,7 @@ if __name__ == "__main__":
 
     MAP_recommender_per_group = {}
 
-    group_id = 2
+    group_id = 3
 
     cutoff = 10
 
@@ -103,14 +97,14 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 2')
+    plt.title('User Group 3')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
     plt.show()
 
 
-    with open("logs/Group2_logs_" + datetime.now().strftime(
+    with open("logs/Group3_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(finalResults, json_file, indent=4)
 
