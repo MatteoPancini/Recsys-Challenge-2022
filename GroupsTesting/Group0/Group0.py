@@ -37,17 +37,17 @@ if __name__ == "__main__":
     # Fitting of recommenders
 
     recommender_object_dict = {}
-
+    '''
     # SLIM BPR
     SlimBPR = SLIM_BPR_Python(URM_train)
     SlimBPR.fit(topK=45, epochs=75, lambda_j=1e-05, lambda_i=1e-05)
     recommender_object_dict['SlimBPR'] = SlimBPR
-    '''
+    
     # P3alpha
     P3alpha = P3alphaRecommender(URM_train)
     P3alpha.fit(topK=218, alpha=0.8561168568686058)
     recommender_object_dict['P3Alpha'] = P3alpha
-    """
+    
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
@@ -71,16 +71,23 @@ if __name__ == "__main__":
                   normalization='bm25plus')
     recommender_object_dict['CombinedItemKNNCFG0'] = ItemKNNCFG0
 
+    # ItemKNNCF
+    newItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
+    newItemKNNCFG0.fit(ICM, shrink=200.37965608072673, topK=4985, similarity='rp3beta',
+                    normalization='tfidf')
+    recommender_object_dict['newItemKNNCFG0'] = newItemKNNCFG0
+
+
     # RP3beta
     RP3betaG0 = RP3betaRecommender(URM_train)
     RP3betaG0.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
     recommender_object_dict['RP3betaG0'] = RP3betaG0
-
+    '''
     # SLIM BPR
     SlimBPRG0 = SLIM_BPR_Python(URM_train)
     SlimBPRG0.fit(topK=4439, epochs=85, lambda_j=0.002175177631903779, lambda_i=0.004642005196062006)
     recommender_object_dict['SlimBPRG0'] = SlimBPRG0
-
+    '''
 
 
     # ---------------------------------------------------------------------------------------------------------
