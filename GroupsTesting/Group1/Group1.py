@@ -44,17 +44,11 @@ if __name__ == "__main__":
 
 
     # RP3beta G1
-    CombinedRP3betaG1 = RP3betaRecommender(CombinedURM)
-    CombinedRP3betaG1.fit(alpha=0.612531391112378, beta=0.30067354757914466, topK=188)
-    recommender_object_dict['CombinedRP3betaG1'] = CombinedRP3betaG1
-
-    # RP3beta G1
-    CombinedRP3betaG1 = RP3betaRecommender(URM_train)
-    CombinedRP3betaG1.fit(alpha=0.612531391112378, beta=0.30067354757914466, topK=188)
-    recommender_object_dict['CombinedRP3betaG1'] = CombinedRP3betaG1
+    newRP3betaG1 = RP3betaRecommender(URM_train)
+    newRP3betaG1.fit(alpha=0.612531391112378, beta=0.30067354757914466, topK=188)
+    recommender_object_dict['newRP3betaG1'] = newRP3betaG1
 
 
-    '''
     # P3alpha + RP3beta
     recommender_P3alpha = P3alphaRecommender(URM_train)
     recommender_P3alpha.fit(topK=218, alpha=0.8561168568686058)
@@ -66,6 +60,7 @@ if __name__ == "__main__":
                                                                 recommender_RP3beta)
     recommender_hybrid.fit(alpha=0.26672657848316894, beta=1.8325046917533472)
     recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid
+
 
     # ItemKNN + RP3beta
     recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train)
@@ -92,8 +87,6 @@ if __name__ == "__main__":
     SlimElasticNetG1 = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNetG1.fit(topK=216, alpha=0.09376418450176816, l1_ratio=0.03954091993785014)
     recommender_object_dict['SlimElasticNetG1'] = SlimElasticNetG1
-
-    '''
 
 
 

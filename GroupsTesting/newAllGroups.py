@@ -39,11 +39,6 @@ if __name__ == "__main__":
 
     recommender_object_dict = {}
 
-    # IASL
-    IASL = ImplicitALSRecommender(URM_train)
-    IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
-    recommender_object_dict['IASL'] = IASL
-
 
     # ItemKNNCF
     ItemKNNCF = ItemKNNCFRecommender(URM_train)
@@ -62,9 +57,9 @@ if __name__ == "__main__":
     recommender_object_dict['P3Alpha'] = P3alpha
 
     # SLIM Elastic Net
-    #SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
-    #SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
-    #recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
+    SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
+    SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
+    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
 
     # P3alpha + RP3beta
     recommender_P3alpha = P3alphaRecommender(URM_train)
@@ -80,7 +75,7 @@ if __name__ == "__main__":
 
     # ------------------------
     # Group 0
-    '''
+
     # ItemKNNCF
     ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
     ItemKNNCFG0.fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',
@@ -106,7 +101,7 @@ if __name__ == "__main__":
     RP3betaG1 = RP3betaRecommender(URM_train)
     RP3betaG1.fit(alpha=0.4770536011269113, beta=0.36946801560978637, topK=190)
     recommender_object_dict['RP3betaG1'] = RP3betaG1
-    '''
+
     # ------------------------
     # Group 2
 
@@ -129,7 +124,7 @@ if __name__ == "__main__":
     for i in range(41629):
         interactions.append(len(URM[i, :].nonzero()[0]))
 
-    list_group_interactions = [[0, 109], [110, 149], [150, max(interactions)]]
+    list_group_interactions = [[0, 219], [220, 289], [290, max(interactions)]]
     MAP_recommender_per_group_int = {}
 
     for group_id in range(0, 3):
