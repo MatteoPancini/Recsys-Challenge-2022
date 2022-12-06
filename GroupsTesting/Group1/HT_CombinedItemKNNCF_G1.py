@@ -63,7 +63,7 @@ if __name__ == '__main__':
     URM_validation_list = []
     users_not_in_group_list = []
 
-    for k in range(5):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -95,10 +95,10 @@ if __name__ == '__main__':
 
         recommender_ItemKNNCF_list = []
 
-        topK = trial.suggest_int("topK", 500, 6000)
-        shrink = trial.suggest_float("shrink", 500, 2000)
-        similarity = trial.suggest_categorical("similarity", ['cosine', 'dice', 'rp3beta'])
-        normalization = trial.suggest_categorical("normalization", ["bm25", "tfidf", "bm25plus"])
+        topK = trial.suggest_int("topK", 2800, 4000)
+        shrink = trial.suggest_int("shrink", 500, 1300)
+        similarity = trial.suggest_categorical("similarity", ["cosine"])
+        normalization = trial.suggest_categorical("normalization", ["bm25"])
 
         for index in range(len(URM_train_list)):
 
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=30)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

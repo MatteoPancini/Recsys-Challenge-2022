@@ -9,6 +9,8 @@ if __name__ == '__main__':
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     import optuna as op
     import json
+    from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import csv
 
     # ---------------------------------------------------------------------------------------------------------
@@ -24,9 +26,9 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'shrink', 'topk', 'similarity', 'normalization',  'MAP']
+    header = ['recommender', 'alpha', 'beta', 'MAP']
 
-    partialsFile = 'CombinedItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'RP3Beta-ItemKNN' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -34,11 +36,10 @@ if __name__ == '__main__':
         # write the header
         writer.writerow(header)
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 0
+    group_id = 1
 
     profile_length = np.ediff1d(URM_train_init.indptr)
 
@@ -95,22 +96,31 @@ if __name__ == '__main__':
     def objective(trial):
 
         recommender_ItemKNNCF_list = []
+        recommender_RP3beta_list = []
+        recommender_Hybrid_list = []
 
-        topK = trial.suggest_int("topK", 1000, 6000)
-        shrink = trial.suggest_float("shrink", 50, 800)
-        similarity = 'rp3beta'
-        normalization = trial.suggest_categorical("normalization", ["tfidf", "bm25plus"])
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
 
         for index in range(len(URM_train_list)):
+            recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index]))
+            recommender_ItemKNNCF_list[index].fit(ICM, shrink=976.8108064049092, topK=5300, similarity='cosine',
+                    normalization='bm25')
 
-            recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
-            recommender_ItemKNNCF_list[index].fit(ICM=ICM, shrink=shrink, topK=topK, similarity=similarity,
-                                                  normalization=normalization)
+            recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
+            recommender_RP3beta_list[index].fit(alpha=0.6190367265325001, beta=0.4018626515197256, topK=206)
 
-        MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
+            recommender_Hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_list[index],
+                                                                                  Recommender_1=
+                                                                                  recommender_ItemKNNCF_list[index],
+                                                                                  Recommender_2=
+                                                                                  recommender_RP3beta_list[index]))
+            recommender_Hybrid_list[index].fit(alpha=alpha, beta=beta)
+
+        MAP_result = evaluator_validation.evaluateRecommender(recommender_Hybrid_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, normalization, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = ["RP3Beta-ItemKNN", alpha, beta, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -120,21 +130,28 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=30)
+    study.optimize(objective, n_trials=20)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
-    topK = study.best_params['topK']
-    shrink = study.best_params['shrink']
-    similarity = 'rp3beta'
-    normalization = study.best_params['normalization']
+    alpha = study.best_params['alpha']
+    beta = study.best_params['beta']
 
-    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init, verbose=False)
-    recommender_ItemKNNCF.fit(ICM=ICM, shrink=shrink, topK=topK, similarity=similarity, normalization=normalization)
+    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init)
+    recommender_ItemKNNCF.fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',
+                  normalization='bm25plus')
+
+    recommender_RP3beta = RP3betaRecommender(URM_train_init)
+    recommender_RP3beta.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
+
+    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init,
+                                                                Recommender_1=recommender_ItemKNNCF,
+                                                                Recommender_2=recommender_RP3beta)
+    recommender_Hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
-    result_dict, _ = evaluator_test.evaluateRecommender(recommender_ItemKNNCF)
+    result_dict, _ = evaluator_test.evaluateRecommender(recommender_Hybrid)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log
@@ -142,7 +159,7 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/Combined" + recommender_ItemKNNCF.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/RP3Beta-ItemKNN" + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

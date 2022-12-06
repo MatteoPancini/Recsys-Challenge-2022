@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
         alpha = trial.suggest_float("alpha", 0.1, 0.9)
         beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 100, 1000)
+        topK = trial.suggest_int("topK", 50, 250)
 
         for index in range(len(URM_train_list)):
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=5)
+    study.optimize(objective, n_trials=30)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
