@@ -38,13 +38,7 @@ if __name__ == "__main__":
     # Fitting of recommenders
 
     recommender_object_dict = {}
-
-    # IASL
-    IASL = ImplicitALSRecommender(URM_train)
-    IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
-    recommender_object_dict['IASL'] = IASL
-
-
+    """
     # ItemKNNCF
     ItemKNNCF = ItemKNNCFRecommender(URM_train)
     ItemKNNCF.fit(ICM, shrink=1665.2431108249625, topK=3228, similarity='dice',
@@ -55,12 +49,7 @@ if __name__ == "__main__":
     RP3beta = RP3betaRecommender(URM_train)
     RP3beta.fit(alpha=0.5126756776495514, beta=0.396119587486951, topK=100)
     recommender_object_dict['RP3Beta'] = RP3beta
-
-    # P3alpha
-    P3alpha = P3alphaRecommender(URM_train)
-    P3alpha.fit(topK=218, alpha=0.8561168568686058)
-    recommender_object_dict['P3Alpha'] = P3alpha
-
+    
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
@@ -76,7 +65,7 @@ if __name__ == "__main__":
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train, recommender_P3alpha,
                                                                 recommender_RP3beta)
     recommender_hybrid.fit(alpha=0.26672657848316894, beta=1.8325046917533472)
-    recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid
+    recommender_object_dict['P3alpha+RP3beta'] = recommender_hybrid"""
 
     # ------------------------
     # Group 0
@@ -91,19 +80,19 @@ if __name__ == "__main__":
     RP3betaG0 = RP3betaRecommender(URM_train)
     RP3betaG0.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
     recommender_object_dict['RP3betaG0'] = RP3betaG0
-
+    """
     # SLIM BPR
     SlimBPRG0 = SLIM_BPR_Python(URM_train)
     SlimBPRG0.fit(topK=4439, epochs=85, lambda_j=0.002175177631903779, lambda_i=0.004642005196062006)
-    recommender_object_dict['SlimBPRG0'] = SlimBPRG0
+    recommender_object_dict['SlimBPRG0'] = SlimBPRG0"""
 
     # ------------------------
     # Group 1
-
+    """
     # SLIM Elastic Net G1
     SlimElasticNetG1 = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNetG1.fit(topK=216, alpha=0.09376418450176816, l1_ratio=0.03954091993785014)
-    recommender_object_dict['SlimElasticNetG1'] = SlimElasticNetG1
+    recommender_object_dict['SlimElasticNetG1'] = SlimElasticNetG1"""
 
     # RP3beta G1
     RP3betaG1 = RP3betaRecommender(URM_train)
@@ -113,8 +102,50 @@ if __name__ == "__main__":
     # ------------------------
     # Group 2
 
+    # ItemKNNCF
+    ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)
+    ItemKNNCFG2.fit(ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta', normalization='tfidf')
+    recommender_object_dict['CombinedItemKNNCFG2'] = ItemKNNCFG2
+
+    # RP3beta
+    RP3betaG2 = RP3betaRecommender(URM_train)
+    RP3betaG2.fit(alpha=0.6687877652632948, beta=0.3841332145259308, topK=103)
+    recommender_object_dict['RP3betaG2'] = RP3betaG2
+
+    # RP3beta_ItemKNN Hybrid
+    recommender1 = ItemKNNCFRecommender(URM_train)
+    recommender1.fit(ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta', normalization='tfidf')
+
+    recommender2 = RP3betaRecommender(URM_train)
+    recommender2.fit(alpha=0.6687877652632948, beta=0.3841332145259308, topK=103)
+
+    hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train, recommender1, recommender2)
+    hybrid.fit(alpha=0.13108190815550153, beta=0.4807361601575698)
+    recommender_object_dict['RP3beta_ItemKNNCF_Hybrid'] = hybrid
+
     # ------------------------
     # Group 3
+
+    # ItemKNNCF
+    ItemKNNCFG3 = ItemKNNCFRecommender(URM_train)
+    ItemKNNCFG3.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
+    recommender_object_dict['CombinedItemKNNCFG3'] = ItemKNNCFG3
+
+    # RP3beta
+    RP3betaG3 = RP3betaRecommender(URM_train)
+    RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+    recommender_object_dict['RP3betaG3'] = RP3betaG3
+
+    # RP3beta_ItemKNN Hybrid
+    recommender1 = ItemKNNCFRecommender(URM_train)
+    recommender1.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
+
+    recommender2 = RP3betaRecommender(URM_train)
+    recommender2.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+
+    hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train, recommender1, recommender2)
+    hybrid.fit(alpha=0.00793735238105765, beta=0.24158612307881616)
+    recommender_object_dict['RP3beta_ItemKNNCF_Hybrid'] = hybrid
 
 
     # ---------------------------------------------------------------------------------------------------------

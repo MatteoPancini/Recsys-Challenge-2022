@@ -1,6 +1,7 @@
 from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
 import numpy as np
 
 
@@ -47,9 +48,7 @@ class GroupHybrid(BaseRecommender):
         # Group 0
 
         self.ItemKNNCFG0 = ItemKNNCFRecommender(self.URM_train)
-        self.ItemKNNCFG0.fit(self.ICM, shrink=200.37965608072673, topK=4985, similarity='rp3beta',
-                           normalization='tfidf')
-
+        self.ItemKNNCFG0.fit(self.ICM, shrink=200.37965608072673, topK=4985, similarity='rp3beta',normalization='tfidf')
 
         # ------------------
         # Group 1
@@ -57,31 +56,35 @@ class GroupHybrid(BaseRecommender):
         self.RP3betaG1 = RP3betaRecommender(self.URM_train)
         self.RP3betaG1.fit(alpha=0.4770536011269113, beta=0.36946801560978637, topK=190)
 
-
         # ------------------
         # Group 2
+
+        self.ItemKNNCFG2 = ItemKNNCFRecommender(self.URM_train)
+        self.ItemKNNCFG2.fit(self.ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta', normalization='tfidf')
 
         self.RP3betaG2 = RP3betaRecommender(self.URM_train)
         self.RP3betaG2.fit(alpha=0.6687877652632948, beta=0.3841332145259308, topK=103)
 
+        self.hybridG2 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.ItemKNNCFG2, self.RP3betaG2)
+        self.hybridG2.fit(alpha=0.13108190815550153, beta=0.4807361601575698)
 
         # ------------------
         # Group 3
 
+        self.ItemKNNCFG3 = ItemKNNCFRecommender(self.URM_train)
+        self.ItemKNNCFG3.fit(self.ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
+
         self.RP3betaG3 = RP3betaRecommender(self.URM_train)
         self.RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
 
-
-
-
-
+        self.hybridG3 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.ItemKNNCFG3, self.RP3betaG3)
+        self.hybridG3.fit(alpha=0.00793735238105765, beta=0.24158612307881616)
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):
 
         items_weights1 = np.empty([len(user_id_array), 24507])
 
         if user_id_array in self.group0:
-            print('group0')
             items_weights1 = self.ItemKNNCFG0._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group1:
@@ -89,11 +92,11 @@ class GroupHybrid(BaseRecommender):
             items_weights1 = self.RP3betaG1._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group2:
-            items_weights1 = self.RP3betaG2._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.hybridG2._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group3:
 
-            items_weights1 = self.RP3betaG3._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.hybridG3._compute_item_score(user_id_array, items_to_compute)
 
         return items_weights1
 

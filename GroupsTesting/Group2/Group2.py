@@ -36,8 +36,7 @@ if __name__ == "__main__":
 
     # ItemKNNCF
     ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG2.fit(ICM, shrink=10.544403292046802, topK=309, similarity='rp3beta',
-                    normalization='tfidf')
+    ItemKNNCFG2.fit(ICM, shrink=199.9030743355846, topK=286, similarity='cosine', normalization='bm25')
     recommender_object_dict['CombinedItemKNNCFG2'] = ItemKNNCFG2
 
     # RP3beta

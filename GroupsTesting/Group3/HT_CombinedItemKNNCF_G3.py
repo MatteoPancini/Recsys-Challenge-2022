@@ -19,7 +19,6 @@ if __name__ == '__main__':
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
@@ -52,7 +51,6 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
-
 
     URM_train_list = []
     URM_validation_list = []
@@ -90,7 +88,7 @@ if __name__ == '__main__':
 
         topK = trial.suggest_int("topK", 100, 500)
         shrink = trial.suggest_float("shrink", 10, 200)
-        similarity = trial.suggest_categorical("similarity", ["cosine", "dice", "rp3beta"])
+        similarity = trial.suggest_categorical("similarity", ["cosine", "rp3beta"])
         normalization = trial.suggest_categorical("normalization", ["bm25", "tfidf", "bm25plus"])
 
         for index in range(len(URM_train_list)):

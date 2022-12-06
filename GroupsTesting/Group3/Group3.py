@@ -30,23 +30,20 @@ if __name__ == "__main__":
 
     recommender_object_dict = {}
 
-    """
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
     recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
-    """
 
     # ItemKNNCF
-    ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG2.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice',
-                    normalization='bm25')
-    recommender_object_dict['CombinedItemKNNCFG3'] = ItemKNNCFG2
+    ItemKNNCFG3 = ItemKNNCFRecommender(URM_train)
+    ItemKNNCFG3.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
+    recommender_object_dict['CombinedItemKNNCFG3'] = ItemKNNCFG3
 
     # RP3beta
-    RP3betaG2 = RP3betaRecommender(URM_train)
-    RP3betaG2.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
-    recommender_object_dict['RP3betaG3'] = RP3betaG2
+    RP3betaG3 = RP3betaRecommender(URM_train)
+    RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+    recommender_object_dict['RP3betaG3'] = RP3betaG3
 
     # RP3beta_ItemKNN Hybrid
     recommender1 = ItemKNNCFRecommender(URM_train)
