@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
         resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, normalization, sum(MAP_result) / len(MAP_result)]
 
-        with open('partials/Combined' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
             writer.writerow(resultsToPrint)
 
