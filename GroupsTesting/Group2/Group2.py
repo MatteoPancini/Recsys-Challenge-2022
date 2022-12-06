@@ -36,12 +36,13 @@ if __name__ == "__main__":
     IASL.fit(iterations=96, factors=320, alpha=10, regularization=0.001)
     recommender_object_dict['IALS'] = IASL
 
+    """
     # SLIM BPR
     SlimBPR = SLIM_BPR_Python(URM_train)
     SlimBPR.fit(topK=102, epochs=99, lambda_j=0.007813058556030521, lambda_i=0.0037653107498663617)
     recommender_object_dict['SlimBPR'] = SlimBPR
 
-    """
+    
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)

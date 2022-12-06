@@ -15,29 +15,26 @@ class GroupHybrid(BaseRecommender):
         self.group0 = []
         self.group1 = []
         self.group2 = []
-        self.group3 = []
 
-        for group_id in range (4):
+        interactions = []
+        for i in range(41629):
+            interactions.append(len(URM_train[i, :].nonzero()[0]))
 
-            profile_length = np.ediff1d(self.URM_train.indptr)
+        list_group_interactions = [[0, 109], [110, 149], [150, max(interactions)]]
 
-            block_size = int(len(profile_length) * 0.25)
+        for group_id in range (3):
+            lower_bound = list_group_interactions[group_id][0]
+            higher_bound = list_group_interactions[group_id][1]
 
-            sorted_users = np.argsort(profile_length)
-
-            start_pos = group_id * block_size
-            end_pos = min((group_id + 1) * block_size, len(profile_length))
-
-            users_in_group = sorted_users[start_pos:end_pos]
+            users_in_group = [user_id for user_id in range(len(interactions))
+                              if (lower_bound <= interactions[user_id] <= higher_bound)]
 
             if(group_id == 0):
                 self.group0 = users_in_group
             elif(group_id == 1):
                 self.group1 = users_in_group
-            if (group_id == 2):
+            elif (group_id == 2):
                 self.group2 = users_in_group
-            elif (group_id == 3):
-                self.group3 = users_in_group
 
 
 
@@ -74,8 +71,6 @@ class GroupHybrid(BaseRecommender):
 
 
 
-
-
     def _compute_item_score(self, user_id_array, items_to_compute = None):
 
         items_weights1 = np.empty([len(user_id_array), 24507])
@@ -84,15 +79,10 @@ class GroupHybrid(BaseRecommender):
             items_weights1 = self.ItemKNNCFG0._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group1:
-
             items_weights1 = self.RP3betaG1._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group2:
             items_weights1 = self.RP3betaG2._compute_item_score(user_id_array, items_to_compute)
-
-        elif user_id_array in self.group3:
-
-            items_weights1 = self.RP3betaG3._compute_item_score(user_id_array, items_to_compute)
 
         return items_weights1
 

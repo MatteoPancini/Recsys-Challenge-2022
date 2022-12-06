@@ -1,5 +1,7 @@
 # Utility method to automatically write in the right format the submission file
 
+import tqdm
+
 def write_submission(recommender, target_users_path, out_path):
     import pandas as pd
     import csv
@@ -15,5 +17,5 @@ def write_submission(recommender, target_users_path, out_path):
         writer = csv.writer(file)
         writer.writerow(['user_id', 'item_list'])
 
-        for userID in targetUsers:
+        for userID in tqdm.tqdm(targetUsers):
             writer.writerow([userID, str(np.array(recommender.recommend(userID, 10)))[1:-1]])

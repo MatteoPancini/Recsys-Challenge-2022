@@ -105,8 +105,8 @@ if __name__ == '__main__':
 
         for index in range(len(URM_train_list)):
             recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index]))
-            recommender_ItemKNNCF_list[index].fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',
-                  normalization='bm25plus')
+            recommender_ItemKNNCF_list[index].fit(ICM, shrink=108.99759968449757, topK=5251, similarity='rp3beta',
+                  normalization='tfidf')
 
             recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
             recommender_RP3beta_list[index].fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)

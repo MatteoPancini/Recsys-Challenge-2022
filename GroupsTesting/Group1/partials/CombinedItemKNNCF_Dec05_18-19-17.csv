@@ -1,0 +1,6 @@
+recommender,shrink,topk,similarity,normalization,MAP
+ItemKNNCFRecommender,1194,3920,cosine,bm25,0.009753652884467579
+ItemKNNCFRecommender,1300,4769,cosine,bm25,0.0097528021014671
+ItemKNNCFRecommender,1038,4905,cosine,bm25,0.009738731969971784
+ItemKNNCFRecommender,1071,5176,cosine,bm25,0.009738928080268123
+ItemKNNCFRecommender,1200,5720,cosine,bm25,0.009747907902449643

@@ -62,9 +62,9 @@ if __name__ == "__main__":
     recommender_object_dict['P3Alpha'] = P3alpha
 
     # SLIM Elastic Net
-    SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
-    SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
-    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
+    #SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
+    #SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
+    #recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
 
     # P3alpha + RP3beta
     recommender_P3alpha = P3alphaRecommender(URM_train)
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # ------------------------
     # Group 0
-
+    '''
     # ItemKNNCF
     ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
     ItemKNNCFG0.fit(ICM, shrink=505.8939180154946, topK=3556, similarity='rp3beta',
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     RP3betaG1 = RP3betaRecommender(URM_train)
     RP3betaG1.fit(alpha=0.4770536011269113, beta=0.36946801560978637, topK=190)
     recommender_object_dict['RP3betaG1'] = RP3betaG1
-
+    '''
     # ------------------------
     # Group 2
 
@@ -115,47 +115,41 @@ if __name__ == "__main__":
 
 
     # ---------------------------------------------------------------------------------------------------------
-    # Profiling
+    # Profiling & Evaluation
 
     profile_length = np.ediff1d(URM_train.indptr)
 
-    block_size = int(len(profile_length) * 0.25)
-
     sorted_users = np.argsort(profile_length)
-
-    for group_id in range(0, 4):
-        start_pos = group_id * block_size
-        end_pos = min((group_id + 1) * block_size, len(profile_length))
-
-        users_in_group = sorted_users[start_pos:end_pos]
-
-        users_in_group_p_len = profile_length[users_in_group]
-
-        print("Group {}, #users in group {}, average p.len {:.2f}, median {}, min {}, max {}".format(
-            group_id,
-            users_in_group.shape[0],
-            users_in_group_p_len.mean(),
-            np.median(users_in_group_p_len),
-            users_in_group_p_len.min(),
-            users_in_group_p_len.max()))
-
-    # ---------------------------------------------------------------------------------------------------------
-    # Evaluation of recommenders based on group
 
     MAP_recommender_per_group = {}
 
     cutoff = 10
 
-    for group_id in range(0, 4):
-        start_pos = group_id * block_size
-        end_pos = min((group_id + 1) * block_size, len(profile_length))
+    interactions = []
+    for i in range(41629):
+        interactions.append(len(URM[i, :].nonzero()[0]))
 
-        users_in_group = sorted_users[start_pos:end_pos]
+    list_group_interactions = [[0, 109], [110, 149], [150, max(interactions)]]
+    MAP_recommender_per_group_int = {}
 
+    for group_id in range(0, 3):
+        lower_bound = list_group_interactions[group_id][0]
+        higher_bound = list_group_interactions[group_id][1]
+
+        users_in_group = [user_id for user_id in range(len(interactions))
+                          if (lower_bound <= interactions[user_id] <= higher_bound)]
         users_in_group_p_len = profile_length[users_in_group]
 
         users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
         users_not_in_group = sorted_users[users_not_in_group_flag]
+
+        print("Group {}, #users in group {}, average p.len {:.2f}, median {}, min {}, max {}".format(
+            group_id,
+            len(users_in_group),
+            users_in_group_p_len.mean(),
+            np.median(users_in_group_p_len),
+            users_in_group_p_len.min(),
+            users_in_group_p_len.max()))
 
         evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[cutoff], ignore_users=users_not_in_group)
 
@@ -178,6 +172,7 @@ if __name__ == "__main__":
         plt.scatter(x=np.arange(0, len(results)), y=results, label=label)
     plt.ylabel('MAP')
     plt.xlabel('User Group')
+    plt.title('New Groups Interactions')
     plt.legend()
     plt.show()
 

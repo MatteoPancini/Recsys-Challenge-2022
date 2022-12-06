@@ -12,40 +12,13 @@ class GroupHybrid(BaseRecommender):
         super(GroupHybrid, self).__init__(URM_train)
         self.ICM = ICM
 
-        self.group0 = []
-        self.group1 = []
-        self.group2 = []
-        self.group3 = []
-
-        for group_id in range (4):
-
-            profile_length = np.ediff1d(self.URM_train.indptr)
-
-            block_size = int(len(profile_length) * 0.25)
-
-            sorted_users = np.argsort(profile_length)
-
-            start_pos = group_id * block_size
-            end_pos = min((group_id + 1) * block_size, len(profile_length))
-
-            users_in_group = sorted_users[start_pos:end_pos]
-
-            if(group_id == 0):
-                self.group0 = users_in_group
-            elif(group_id == 1):
-                self.group1 = users_in_group
-            if (group_id == 2):
-                self.group2 = users_in_group
-            elif (group_id == 3):
-                self.group3 = users_in_group
-
 
 
     def fit(self):
 
         #------------------
         # Group 0
-
+        '''
         self.ItemKNNCFG0 = ItemKNNCFRecommender(self.URM_train)
         self.ItemKNNCFG0.fit(self.ICM, shrink=200.37965608072673, topK=4985, similarity='rp3beta',
                            normalization='tfidf')
@@ -70,8 +43,11 @@ class GroupHybrid(BaseRecommender):
 
         self.RP3betaG3 = RP3betaRecommender(self.URM_train)
         self.RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+        '''
 
 
+        self.RP3beta = RP3betaRecommender(self.URM_train)
+        self.RP3beta.fit(alpha=0.5126756776495514, beta=0.396119587486951, topK=100)
 
 
 
@@ -80,19 +56,18 @@ class GroupHybrid(BaseRecommender):
 
         items_weights1 = np.empty([len(user_id_array), 24507])
 
-        if user_id_array in self.group0:
-            items_weights1 = self.ItemKNNCFG0._compute_item_score(user_id_array, items_to_compute)
+        for i in range(len(user_id_array)):
+            interactions = len(self.URM_train[user_id_array[i],:].indices)
 
-        elif user_id_array in self.group1:
+            if interactions < 110:
+                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
 
-            items_weights1 = self.RP3betaG1._compute_item_score(user_id_array, items_to_compute)
+            elif interactions > 109 and interactions < 150:
+                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
 
-        elif user_id_array in self.group2:
-            items_weights1 = self.RP3betaG2._compute_item_score(user_id_array, items_to_compute)
+            elif interactions > 149:
+                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
 
-        elif user_id_array in self.group3:
-
-            items_weights1 = self.RP3betaG3._compute_item_score(user_id_array, items_to_compute)
 
         return items_weights1
 
