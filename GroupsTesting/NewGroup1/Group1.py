@@ -104,7 +104,7 @@ if __name__ == "__main__":
     plt.show()
 
 
-    with open("logs/Group3_logs_" + datetime.now().strftime(
+    with open("logs/Group1_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(finalResults, json_file, indent=4)
 

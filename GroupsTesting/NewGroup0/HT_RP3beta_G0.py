@@ -31,17 +31,35 @@ if __name__ == '__main__':
         writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
+    # Profiling
+
+    group_id = 0
+
+    profile_length = np.ediff1d(URM.indptr)
+    sorted_users = np.argsort(profile_length)
+
+    lower_bound = 0
+    higher_bound = 22
+
+    interactions = []
+    for i in range(41629):
+        interactions.append(len(URM[i, :].nonzero()[0]))
+
+    users_in_group = [user_id for user_id in range(len(interactions)) if
+                      (lower_bound <= interactions[user_id] <= higher_bound)]
+    users_in_group_p_len = profile_length[users_in_group]
+
+    users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+    users_not_in_group = sorted_users[users_not_in_group_flag]
+
+    # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
     URM_train_list = []
     URM_validation_list = []
     users_not_in_group_list = []
 
-    interactions = []
-    for i in range(41629):
-        interactions.append(len(URM[i, :].nonzero()[0]))
-
-    for k in range(5):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -70,9 +88,9 @@ if __name__ == '__main__':
 
         recommender_RP3beta_list = []
 
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
-        beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 100, 500)
+        alpha = trial.suggest_float("alpha", 0.4, 0.8)
+        beta = trial.suggest_float("beta", 0.1, 0.2)
+        topK = trial.suggest_int("topK", 200, 1000)
 
         for index in range(len(URM_train_list)):
 
@@ -93,7 +111,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
