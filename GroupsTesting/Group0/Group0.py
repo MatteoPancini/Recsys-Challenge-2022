@@ -56,7 +56,7 @@ if __name__ == "__main__":
     newRP3betaG0.fit(alpha=0.6649656555023034, beta=0.23957286370333863, topK=254)
     recommender_object_dict['newRP3betaG0'] = newRP3betaG0
 
-    '''
+
     # RP3beta + ItemKNNCF
     recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train)
     recommender_ItemKNNCF.fit(ICM, shrink=108.99759968449757, topK=5251, similarity='rp3beta',
@@ -70,7 +70,7 @@ if __name__ == "__main__":
                                                     Recommender_2=recommender_ItemKNNCF)
     oldhybrid.fit(alpha=0.36914252072676557, beta=0.37856318068441236)
     recommender_object_dict['old RP3beta + ItemKNNCF'] = oldhybrid
-
+    '''
     # Slim Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(alpha=0.30855661490772857, l1_ratio=0.0034223693582097203, topK=405)

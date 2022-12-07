@@ -48,14 +48,30 @@ class GroupHybrid(BaseRecommender):
         #------------------
         # Group 0
 
-        self.ItemKNNCFG0 = ItemKNNCFRecommender(self.URM_train)
-        self.ItemKNNCFG0.fit(self.ICM, shrink=200.37965608072673, topK=4985, similarity='rp3beta',normalization='tfidf')
+        recommender_ItemKNNCFG0 = ItemKNNCFRecommender(self.URM_train)
+        recommender_ItemKNNCFG0.fit(self.ICM, shrink=108.99759968449757, topK=5251, similarity='rp3beta',
+                                  normalization='tfidf')
+
+        recommender_RP3betaG0 = RP3betaRecommender(self.URM_train)
+        recommender_RP3betaG0.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
+
+        self.hybridG0 = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=recommender_RP3betaG0,
+                                                           Recommender_2=recommender_ItemKNNCFG0)
+        self.hybridG0.fit(alpha=0.36914252072676557, beta=0.37856318068441236)
 
         # ------------------
         # Group 1
 
-        self.RP3betaG1 = RP3betaRecommender(self.URM_train)
-        self.RP3betaG1.fit(alpha=0.4770536011269113, beta=0.36946801560978637, topK=190)
+        recommender_ItemKNNCFG1 = ItemKNNCFRecommender(self.URM_train)
+        recommender_ItemKNNCFG1.fit(self.ICM, shrink=976.8108064049092, topK=5300, similarity='cosine',
+                                  normalization='bm25')
+
+        recommender_RP3beta = RP3betaRecommender(self.URM_train)
+        recommender_RP3beta.fit(alpha=0.6190367265325001, beta=0.4018626515197256, topK=206)
+
+        self.hybridG1 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, recommender_ItemKNNCFG1,
+                                                                     recommender_RP3beta)
+        self.hybridG1.fit(alpha=0.07806573588790788, beta=0.8465619360796353)
 
         # ------------------
         # Group 2
@@ -74,11 +90,11 @@ class GroupHybrid(BaseRecommender):
         items_weights1 = np.empty([len(user_id_array), 24507])
 
         if user_id_array in self.group0:
-            items_weights1 = self.ItemKNNCFG0._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.hybridG0._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group1:
 
-            items_weights1 = self.RP3betaG1._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.hybridG1._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group2:
             items_weights1 = self.hybridG2._compute_item_score(user_id_array, items_to_compute)
