@@ -32,15 +32,31 @@ if __name__ == '__main__':
         writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
+    # Profiling
+
+    profile_length = np.ediff1d(URM.indptr)
+    sorted_users = np.argsort(profile_length)
+
+    interactions = []
+    for i in range(41629):
+        interactions.append(len(URM[i, :].nonzero()[0]))
+
+    lower_bound = 36
+    higher_bound = max(interactions)
+
+    users_in_group = [user_id for user_id in range(len(interactions)) if
+                      (lower_bound <= interactions[user_id] <= higher_bound)]
+    users_in_group_p_len = profile_length[users_in_group]
+
+    users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+    users_not_in_group = sorted_users[users_not_in_group_flag]
+
+    # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
     URM_train_list = []
     URM_validation_list = []
     users_not_in_group_list = []
-
-    interactions = []
-    for i in range(41629):
-        interactions.append(len(URM[i, :].nonzero()[0]))
 
     for k in range(5):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)

@@ -97,14 +97,14 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 3')
+    plt.title('User Group 1')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
     plt.show()
 
 
-    with open("logs/Group3_logs_" + datetime.now().strftime(
+    with open("logs/Group1_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(finalResults, json_file, indent=4)
 

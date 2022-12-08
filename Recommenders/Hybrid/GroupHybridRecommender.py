@@ -97,7 +97,7 @@ class GroupHybrid(BaseRecommender):
             items_weights1 = self.hybridG1._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group2:
-            items_weights1 = self.hybridG2._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.SlimElasticNetG2._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group3:
 
