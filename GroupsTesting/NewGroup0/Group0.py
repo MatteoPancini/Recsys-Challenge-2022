@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # RP3beta
     RP3betaG3 = RP3betaRecommender(URM_train)
-    RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+    RP3betaG3.fit(alpha=0.6446628838942595, beta=0.21126459383188553, topK=363)
     recommender_object_dict['RP3betaG0'] = RP3betaG3
 
     # RP3beta_ItemKNN Hybrid
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 3')
+    plt.title('User Group 0')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()

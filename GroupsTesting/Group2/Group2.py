@@ -28,11 +28,11 @@ if __name__ == "__main__":
     # Fitting of recommenders
 
     recommender_object_dict = {}
-    """
+
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=100, alpha=0.010975001075569505, l1_ratio=0.48011657798419954)
-    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet"""
+    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
 
     # ItemKNNCF
     ItemKNNCFG2 = ItemKNNCFRecommender(URM_train)

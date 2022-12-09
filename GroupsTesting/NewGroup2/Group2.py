@@ -36,12 +36,12 @@ if __name__ == "__main__":
 
     # ItemKNNCF
     ItemKNNCFG3 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG3.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
+    ItemKNNCFG3.fit(ICM, shrink=70.1379551149676, topK=242, similarity='cosine', normalization='bm25')
     recommender_object_dict['CombinedItemKNNCFG2'] = ItemKNNCFG3
 
     # RP3beta
     RP3betaG3 = RP3betaRecommender(URM_train)
-    RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
+    RP3betaG3.fit(alpha=0.3612672968903767, beta=0.32316704530510937, topK=100)
     recommender_object_dict['RP3betaG2'] = RP3betaG3
 
     # RP3beta_ItemKNN Hybrid

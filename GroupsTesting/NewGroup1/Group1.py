@@ -97,7 +97,7 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('User Group 3')
+    plt.title('User Group 1')
     plt.ylabel('MAP')
     plt.xlabel('Recommenders')
     plt.legend()
