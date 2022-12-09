@@ -68,7 +68,7 @@ if __name__ == '__main__':
         MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, feature_weighting, normalization, ICMweight, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, normalization, ICMweight, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
