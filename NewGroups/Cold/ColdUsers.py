@@ -13,7 +13,7 @@ if __name__ == "__main__":
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
     from datetime import datetime
@@ -39,24 +39,7 @@ if __name__ == "__main__":
 
     recommender_object_dict = {}
 
-    # ItemKNNCF
-    ItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG0.fit(ICM, shrink=108.99759968449757, topK=5251, similarity='rp3beta',
-                       normalization='tfidf')
-    recommender_object_dict['ItemKNNCFG0'] = ItemKNNCFG0
-
-
-    # RP3beta
-    RP3betaG0 = RP3betaRecommender(URM_train)
-    RP3betaG0.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
-    recommender_object_dict['RP3betaG0'] = RP3betaG0
-
-    # RP3beta
-    newRP3betaG0 = RP3betaRecommender(URM_train)
-    newRP3betaG0.fit(alpha=0.6649656555023034, beta=0.23957286370333863, topK=254)
-    recommender_object_dict['newRP3betaG0'] = newRP3betaG0
-
-
+    '''
     # RP3beta + ItemKNNCF
     recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train)
     recommender_ItemKNNCF.fit(ICM, shrink=108.99759968449757, topK=5251, similarity='rp3beta',
@@ -70,11 +53,62 @@ if __name__ == "__main__":
                                                     Recommender_2=recommender_ItemKNNCF)
     oldhybrid.fit(alpha=0.36914252072676557, beta=0.37856318068441236)
     recommender_object_dict['old RP3beta + ItemKNNCF'] = oldhybrid
+    '''
 
-    # Slim Elastic Net
-    SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
-    SlimElasticNet.fit(alpha=0.30855661490772857, l1_ratio=0.0034223693582097203, topK=405)
-    recommender_object_dict['SlimElasticNet'] = SlimElasticNet
+
+    # ItemKNNCF
+    bestItemKNNCFG0 = ItemKNNCFRecommender(URM_train)
+    bestItemKNNCFG0.fit(ICM, shrink=50, topK=5893, similarity='rp3beta',
+                    normalization='tfidf')
+    recommender_object_dict['bestItemKNNCFG0'] = bestItemKNNCFG0
+
+
+    '''
+    # RP3beta + ItemKNNCF
+    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train)
+    recommender_ItemKNNCF.fit(ICM, shrink=84, topK=3738, similarity='rp3beta',
+                    normalization='tfidf')
+
+    recommender_RP3beta = RP3betaRecommender(URM_train)
+    recommender_RP3beta.fit(alpha=0.6419696179241512, beta=0.17548429620374373, topK=279)
+
+    newhybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train, Recommender_1=recommender_RP3beta,
+                                                       Recommender_2=recommender_ItemKNNCF)
+    newhybrid.fit(alpha=0.36914252072676557, beta=0.37856318068441236)
+    recommender_object_dict['new RP3beta + ItemKNNCF'] = newhybrid
+    '''
+    # P3alpha
+    lastP3alpha = P3alphaRecommender(URM_train)
+    lastP3alpha.fit(alpha=0.7094999549046719, topK=108)
+    recommender_object_dict['lastP3alpha'] = lastP3alpha
+
+    # RP3beta
+    RP3betaG0 = RP3betaRecommender(URM_train)
+    RP3betaG0.fit(alpha=0.6419696179241512, beta=0.17548429620374373, topK=279)
+    recommender_object_dict['RP3betaG0'] = RP3betaG0
+
+
+    newhybrid2 = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train, Recommender_1=lastP3alpha,
+                                                        Recommender_2=RP3betaG0)
+    newhybrid2.fit()
+    recommender_object_dict['new2 RP3beta + P3alpha'] = newhybrid2
+
+    # P3alpha
+    P3alpha5k = P3alphaRecommender(URM_train)
+    P3alpha5k.fit(alpha=0.7548498182179307, topK=140)
+    recommender_object_dict['P3alpha5k'] = P3alpha5k
+
+    # ItemKNNCF
+    ItemKNNCFG05k = ItemKNNCFRecommender(URM_train)
+    ItemKNNCFG05k.fit(ICM, shrink=82, topK=4160, similarity='rp3beta',
+                        normalization='tfidf')
+    recommender_object_dict['ItemKNNCFG05k'] = ItemKNNCFG05k
+
+
+    newhybrid4 = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train, Recommender_1=RP3betaG0,
+                                                       Recommender_2=bestItemKNNCFG0)
+    newhybrid4.fit(alpha=0.01, beta=0.99)
+    recommender_object_dict['rp3beta + ItemKNN'] = newhybrid4
 
     # ---------------------------------------------------------------------------------------------------------
     # Evaluation of recommenders based on group
