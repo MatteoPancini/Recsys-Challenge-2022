@@ -5,12 +5,12 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDItemRecommender
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURM
     import json
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createBumpURM()
+    URM = createURM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -24,8 +24,8 @@ if __name__ == '__main__':
     # Coarse-to-fine hyperparameter model
 
     grid_size = 100
-    TUNE_ITER = 20
-    num_epochs = 5
+    TUNE_ITER = 2
+    num_epochs = 1
     worse_score = 0
 
     # Hyperparameter tuning interval
@@ -85,8 +85,7 @@ if __name__ == '__main__':
         # Generate new hyperparameter space based on current worse and best hyperparameter combinations
         for key in init_param_grid:
             if isinstance(init_param_grid[key][0], int):
-                new_param_grid[key] = np.unique(
-                    [i for i in range(int(df_rs_results_min[key]), int(df_rs_results_max[key]) + 1)])
+                new_param_grid[key] = np.unique([i for i in range(int(df_rs_results_min[key]), int(df_rs_results_max[key]) + 1)])
             elif isinstance(init_param_grid[key][0], float):
                 new_param_grid[key] = np.unique(np.linspace(df_rs_results_min[key], df_rs_results_max[key], grid_size))
             else:
