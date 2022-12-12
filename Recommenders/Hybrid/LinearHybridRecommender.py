@@ -1,6 +1,7 @@
 from ..Recommender_utils import check_matrix
 from ..BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
 from numpy import linalg as LA
+import numpy as np
 
 
 
@@ -44,18 +45,30 @@ class LinearHybridTwoRecommenderTwoVariables(BaseItemSimilarityMatrixRecommender
         self.Recommender_1 = Recommender_1
         self.Recommender_2 = Recommender_2
 
-    def fit(self, alpha=0.5, beta=0.5):
+    def fit(self, alpha=0.5, beta=0.5, norm_scores=False):
         self.alpha = alpha
         self.beta = beta
+        self.norm_scores = norm_scores
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
+        print('inizio computo1')
         item_weights_1 = self.Recommender_1._compute_item_score(user_id_array, items_to_compute)
+        print('inizio computo2')
         item_weights_2 = self.Recommender_2._compute_item_score(user_id_array, items_to_compute)
 
-        item_weights_1 /= LA.norm(item_weights_1, 2)
-        item_weights_2 /= LA.norm(item_weights_2, 2)
+        if self.norm_scores:
+            mean1 = np.mean(item_weights_1)
+            mean2 = np.mean(item_weights_2)
+            std1 = np.std(item_weights_1)
+            std2 = np.std(item_weights_2)
+            if std1 != 0 and std2 != 0:
+                item_weights_1 = (item_weights_1 - mean1) / std1
+                item_weights_2 = (item_weights_2 - mean2) / std2
+        #item_weights_1 /= LA.norm(item_weights_1, 2)
+        #item_weights_2 /= LA.norm(item_weights_2, 2)
 
         item_weights = item_weights_1 * self.alpha + item_weights_2 * self.beta
+        print('ritorno weights')
 
         return item_weights
 

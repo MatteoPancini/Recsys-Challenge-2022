@@ -7,15 +7,30 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import optuna as op
     import json
+    import csv
+    from optuna.samplers import RandomSampler
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
 
     URM = createURM()
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Creating CSV header
+
+    header = ['recommender', 'alpha', 'beta', 'MAP']
+
+    partialsFile = 'SlimRP3Beta_' + datetime.now().strftime('%b%d_%H-%M-%S')
+
+    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
+        writer = csv.writer(f)
+
+        # write the header
+        writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
@@ -25,7 +40,7 @@ if __name__ == '__main__':
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(3):
+    for k in range(1):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -40,8 +55,10 @@ if __name__ == '__main__':
     recommender_RP3beta_list = []
 
     for index in range(len(URM_train_list)):
-        recommender_SlimElasticnet_list.append(P3alphaRecommender(URM_train_list[index]))
+
+        recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
         recommender_SlimElasticnet_list[index].fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
+
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
         recommender_RP3beta_list[index].fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
@@ -61,10 +78,17 @@ if __name__ == '__main__':
         MAP_result = evaluator_validation.evaluateRecommender(recommender_Hybrid_list)
         MAP_results_list.append(MAP_result)
 
+        resultsToPrint = ['SlimRP3Beta', alpha, beta,
+                          sum(MAP_result) / len(MAP_result)]
+
+        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(resultsToPrint)
+
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -72,7 +96,6 @@ if __name__ == '__main__':
 
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
-
 
     recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)
     recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)

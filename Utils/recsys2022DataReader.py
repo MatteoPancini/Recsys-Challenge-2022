@@ -10,7 +10,7 @@ urmPath = "../Input/interactions_and_impressions.csv"
 icmTypePath = "../Input/data_ICM_type.csv"
 icmLenghtPath = "../Input/data_ICM_length.csv"
 '''
-urmPath = "../../../Input/interactions_and_impressions.csv"
+urmPath = "../../Input/interactions_and_impressions.csv"
 icmTypePath = "../../Input/data_ICM_type.csv"
 icmLenghtPath = "../../Input/data_ICM_length.csv"
 
