@@ -1,6 +1,7 @@
 from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
 import numpy as np
 
 
@@ -45,10 +46,20 @@ class GroupHybrid(BaseRecommender):
         self.RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
         '''
 
+        self.ItemKNNCFG0 = ItemKNNCFRecommender(self.URM_train)
+        self.ItemKNNCFG0.fit(self.ICM, shrink=50, topK=5893, similarity='rp3beta',
+                            normalization='tfidf')
 
+        self.SlimElasticNetG2 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        self.SlimElasticNetG2.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
+
+        self.SlimElasticNetG1 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        self.SlimElasticNetG1.fit(topK=216, alpha=0.09376418450176816, l1_ratio=0.03954091993785014)
+
+        '''
         self.RP3beta = RP3betaRecommender(self.URM_train)
         self.RP3beta.fit(alpha=0.5126756776495514, beta=0.396119587486951, topK=100)
-
+        '''
 
 
 
@@ -59,14 +70,14 @@ class GroupHybrid(BaseRecommender):
         for i in range(len(user_id_array)):
             interactions = len(self.URM_train[user_id_array[i],:].indices)
 
-            if interactions < 110:
-                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
+            if interactions < 21:
+                items_weights1 = self.ItemKNNCFG0._compute_item_score(user_id_array, items_to_compute)
 
-            elif interactions > 109 and interactions < 150:
-                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
+            elif interactions > 20 and interactions < 50:
+                items_weights1 = self.SlimElasticNetG1._compute_item_score(user_id_array, items_to_compute)
 
-            elif interactions > 149:
-                items_weights1 = self.RP3beta._compute_item_score(user_id_array, items_to_compute)
+            elif interactions > 49:
+                items_weights1 = self.SlimElasticNetG2._compute_item_score(user_id_array, items_to_compute)
 
 
         return items_weights1

@@ -65,6 +65,23 @@ if __name__ == "__main__":
     hybrid.fit(alpha=0.00793735238105765, beta=0.24158612307881616)
     recommender_object_dict['RP3beta_ItemKNNCF_Hybrid'] = hybrid
 
+    # RP3beta
+    RP3betaHot = RP3betaRecommender(URM_train)
+    RP3betaHot.fit(alpha=0.7136052911660057, beta=0.44828831909194655, topK=54)
+    recommender_object_dict['RP3betaHot'] = RP3betaHot
+
+    # RP3beta
+    IALSHot = ImplicitALSRecommender(URM_train)
+    IALSHot.fit(factors=145, alpha=2, iterations=84, regularization=0.0068126415129997255)
+    recommender_object_dict['IALSHot'] = IALSHot
+
+    # SLIM Elastic Net
+    SlimElasticNetHot = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
+    SlimElasticNetHot.fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
+    recommender_object_dict['SlimElasticNetHot'] = SlimElasticNetHot
+
+
+
     # ---------------------------------------------------------------------------------------------------------
     # Evaluation of recommenders based on group
 

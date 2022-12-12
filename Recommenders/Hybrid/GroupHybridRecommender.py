@@ -2,7 +2,7 @@ from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables, LinearHybridTwoRecommenderOneVariable
 import numpy as np
 
 
@@ -76,6 +76,7 @@ class GroupHybrid(BaseRecommender):
         # ------------------
         # Group 2
 
+        '''
         self.SlimElasticNetG2 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
         self.SlimElasticNetG2.fit(topK=100, alpha=0.010975001075569505, l1_ratio=0.48011657798419954)
 
@@ -84,6 +85,20 @@ class GroupHybrid(BaseRecommender):
 
         self.SlimElasticNetG3 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
         self.SlimElasticNetG3.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
+        '''
+        recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
+
+        recommender_RP3beta = RP3betaRecommender(self.URM_train)
+        recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
+
+        self.recommender_Hybrid23 = LinearHybridTwoRecommenderOneVariable(URM_train=self.URM_train,
+                                                                   Recommender_1=recommender_Slim_Elasticnet,
+                                                                   Recommender_2=recommender_RP3beta)
+        self.recommender_Hybrid23.fit(alpha=0.27553159386864057)
+
+
+
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):
 
@@ -97,11 +112,11 @@ class GroupHybrid(BaseRecommender):
             items_weights1 = self.hybridG1._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group2:
-            items_weights1 = self.SlimElasticNetG2._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.recommender_Hybrid23._compute_item_score(user_id_array, items_to_compute)
 
         elif user_id_array in self.group3:
 
-            items_weights1 = self.SlimElasticNetG3._compute_item_score(user_id_array, items_to_compute)
+            items_weights1 = self.recommender_Hybrid23._compute_item_score(user_id_array, items_to_compute)
 
         return items_weights1
 
