@@ -27,8 +27,6 @@ class LinearHybridTwoRecommenderNoVariables(BaseItemSimilarityMatrixRecommender)
         item_weights_1 /= LA.norm(item_weights_1, 2)
         item_weights_2 /= LA.norm(item_weights_2, 2)
 
-
-
         item_weights = item_weights_1 + item_weights_2
 
         return item_weights

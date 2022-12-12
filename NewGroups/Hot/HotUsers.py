@@ -19,13 +19,10 @@ if __name__ == "__main__":
     from datetime import datetime
     import json
 
-
-
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM + ICM
 
     URM = createURM()
-
     ICM = createSmallICM()
 
     # ---------------------------------------------------------------------------------------------------------
@@ -33,26 +30,25 @@ if __name__ == "__main__":
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Fitting of recommenders
 
     recommender_object_dict = {}
-
+    """
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
-    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
+    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet"""
 
     # ItemKNNCF
-    ItemKNNCFG3 = ItemKNNCFRecommender(URM_train)
-    ItemKNNCFG3.fit(ICM, shrink=57.6924228938274, topK=408, similarity='dice', normalization='bm25')
-    recommender_object_dict['CombinedItemKNNCFG3'] = ItemKNNCFG3
+    ItemKNNCFHot = ItemKNNCFRecommender(URM_train)
+    ItemKNNCFHot.fit(ICM, shrink=62.12102837804762, topK=479, similarity='cosine', normalization='tfidf')
+    recommender_object_dict['CombinedItemKNNCFHot'] = ItemKNNCFHot
 
     # RP3beta
-    RP3betaG3 = RP3betaRecommender(URM_train)
-    RP3betaG3.fit(alpha=0.5674554399991163, beta=0.38051048617892586, topK=100)
-    recommender_object_dict['RP3betaG3'] = RP3betaG3
+    RP3betaHot = RP3betaRecommender(URM_train)
+    RP3betaHot.fit(alpha=0.2617149087459967, beta=0.38766862684444214, topK=109)
+    recommender_object_dict['RP3betaHot'] = RP3betaHot
 
     # RP3beta_ItemKNN Hybrid
     recommender1 = ItemKNNCFRecommender(URM_train)
@@ -88,7 +84,6 @@ if __name__ == "__main__":
     MAP_recommender_per_group = {}
 
     group_id = 2
-
     cutoff = 10
 
     profile_length = np.ediff1d(URM.indptr)
@@ -103,8 +98,7 @@ if __name__ == "__main__":
     lower_bound = list_group_interactions[group_id][0]
     higher_bound = list_group_interactions[group_id][1]
 
-    users_in_group = [user_id for user_id in range(len(interactions))
-                      if (lower_bound <= interactions[user_id] <= higher_bound)]
+    users_in_group = [user_id for user_id in range(len(interactions)) if (lower_bound <= interactions[user_id] <= higher_bound)]
     users_in_group_p_len = profile_length[users_in_group]
 
     users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
