@@ -51,9 +51,7 @@ class LinearHybridTwoRecommenderTwoVariables(BaseItemSimilarityMatrixRecommender
         self.norm_scores = norm_scores
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
-        print('inizio computo1')
         item_weights_1 = self.Recommender_1._compute_item_score(user_id_array, items_to_compute)
-        print('inizio computo2')
         item_weights_2 = self.Recommender_2._compute_item_score(user_id_array, items_to_compute)
 
         if self.norm_scores:

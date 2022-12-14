@@ -7,7 +7,6 @@ if __name__ == '__main__':
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import optuna as op
     import json
@@ -40,7 +39,7 @@ if __name__ == '__main__':
     recommender_RP3beta_list = []
 
     for index in range(len(URM_train_list)):
-        recommender_SlimElasticnet_list.append(P3alphaRecommender(URM_train_list[index]))
+        recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
         recommender_SlimElasticnet_list[index].fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
@@ -65,7 +64,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

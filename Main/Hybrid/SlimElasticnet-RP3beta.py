@@ -1,13 +1,13 @@
 if __name__ == '__main__':
 
-    from Utils.recsys2022DataReader import createBumpURM
+    from Utils.recsys2022DataReader import createURM
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderNoVariables
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Utils.writeSubmission import write_submission
 
     # Loading URM
-    URM = createBumpURM()
+    URM = createURM()
 
     # Create the recommenders
     recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM)
@@ -16,8 +16,8 @@ if __name__ == '__main__':
     recommender_RP3beta = RP3betaRecommender(URM)
     recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
 
-    recommender_Hybrid = LinearHybridTwoRecommenderNoVariables(URM_train=URM, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
-    recommender_Hybrid.fit(alpha=0.27553159386864057)
+    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
+    recommender_Hybrid.fit(alpha=0.4412685738019454, beta=0.9960652190181091)
 
     # Write the submission file
     write_submission(recommender=recommender_Hybrid,
