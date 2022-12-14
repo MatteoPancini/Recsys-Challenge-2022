@@ -36,7 +36,7 @@ if __name__ == '__main__':
         # ---------------------------------------------------------------------------------------------------------
         # Profiling
 
-        group_id = 1
+        group_id = 2
 
         profile_length = np.ediff1d(URM_train_init.indptr)
         sorted_users = np.argsort(profile_length)
@@ -92,11 +92,11 @@ if __name__ == '__main__':
     for index in range(len(URM_train_list)):
 
         recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
-        recommender_SlimElasticnet_list[index].fit(topK=185, alpha=0.06551072224428456, l1_ratio=0.0325741293613841)
+        recommender_SlimElasticnet_list[index].fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
 
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
-        recommender_RP3beta_list[index].fit(alpha=0.572121247163269, beta=0.3107107930844788, topK=92)
+        recommender_RP3beta_list[index].fit(alpha=0.7136052911660057, beta=0.44828831909194655, topK=54)
 
     def objective(trial):
 

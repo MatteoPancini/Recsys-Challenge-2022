@@ -61,7 +61,7 @@ def createURMBinary():
 
     URM = np.zeros((len(userIDS), len(itemIDS)), dtype=int)
     for x in range(len(datasetCOO.data)):
-        if datasetCOO.data[x] == 0 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 1:
+        if (datasetCOO.data[x] == 0 or datasetCOO.data[x] == 1) and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 1:
             URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(1)
 
     URM = sp.csr_matrix(URM)

@@ -73,7 +73,6 @@ class LinearHybridTwoRecommenderTwoVariables(BaseItemSimilarityMatrixRecommender
         #item_weights_2 /= LA.norm(item_weights_2, 2)
 
         item_weights = item_weights_1 * self.alpha + item_weights_2 * self.beta
-        print('ritorno weights')
 
         return item_weights
 
