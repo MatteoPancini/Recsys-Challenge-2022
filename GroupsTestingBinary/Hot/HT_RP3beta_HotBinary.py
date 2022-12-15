@@ -2,7 +2,7 @@ if __name__ == "__main__":
 
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import createURM
+    from Utils.recsys2022DataReader import createURMBinary
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
@@ -10,9 +10,10 @@ if __name__ == "__main__":
     import optuna as op
     import numpy as np
     import csv
+
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURM()
+    URM = createURMBinary()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 0
+    group_id = 2
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)
@@ -70,8 +71,7 @@ if __name__ == "__main__":
         profile_length = np.ediff1d(URM_train_init.indptr)
         sorted_users = np.argsort(profile_length)
 
-        users_in_group = [user_id for user_id in range(len(interactions))
-                          if (lower_bound <= interactions[user_id] <= higher_bound)]
+        users_in_group = [user_id for user_id in range(len(interactions)) if (lower_bound <= interactions[user_id] <= higher_bound)]
         users_in_group_p_len = profile_length[users_in_group]
 
         users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
         alpha = trial.suggest_float("alpha", 0.1, 0.9)
         beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 5, 1000)
+        topK = trial.suggest_int("topK", 100, 500)
 
         for index in range(len(URM_train_list)):
             recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index], verbose=False))
@@ -108,6 +108,7 @@ if __name__ == "__main__":
             writer.writerow(resultsToPrint)
 
         return sum(MAP_result) / len(MAP_result)
+
 
     study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=300)
