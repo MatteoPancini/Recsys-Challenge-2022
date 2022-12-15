@@ -19,8 +19,6 @@ class GroupHybrid(BaseRecommender):
 
     def fit(self):
 
-
-
         # ------------------
         # COLD
 
