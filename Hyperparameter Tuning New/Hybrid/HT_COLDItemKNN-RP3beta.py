@@ -93,7 +93,7 @@ if __name__ == '__main__':
     rec2 = RP3betaRecommender(URM_train_init)
     rec2.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
 
-    hybrid = LinearHybridTwoRecommenderNoVariables(URM_train=URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
+    hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
