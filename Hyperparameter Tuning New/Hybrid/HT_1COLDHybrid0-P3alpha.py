@@ -7,7 +7,7 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
     from Utils.recsys2022DataReader import *
-    from Recommenders.Hybrid.HandMade.Hybrid0COLDItemKNNRP3beta import Hybrid0
+    from Recommenders.Hybrid.HandMade.Hybrid0 import Hybrid0
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import optuna as op

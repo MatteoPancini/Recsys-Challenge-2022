@@ -3,7 +3,7 @@ from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderOneVariable
 import numpy as np
 
 
@@ -20,14 +20,13 @@ class Hybrid0(BaseRecommender):
     def fit(self):
 
         self.rec1 = ItemKNNCFRecommender(self.URM_train)
-        self.rec1.fit(self.ICM, shrink=1665.2431108249625, topK=3228, similarity='dice',
-                                            normalization='bm25')
+        self.rec1.fit(ICM=self.ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
 
         self.rec2 = RP3betaRecommender(self.URM_train)
-        self.rec2.fit(alpha=0.748706443270007, beta=0.16081149387492433, topK=370)
+        self.rec2.fit(alpha=0.6627101454340679, beta=0.2350020032542621, topK=250)
 
-        self.Hybrid = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.rec1, self.rec2)
-        self.Hybrid.fit(alpha=0.20725587449876504, beta=0.6358928843508406)
+        self.Hybrid = LinearHybridTwoRecommenderOneVariable(self.URM_train, self.rec1, self.rec2)
+        self.Hybrid.fit(alpha=0.2584478495159924)
 
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):

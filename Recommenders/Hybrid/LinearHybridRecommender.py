@@ -140,7 +140,7 @@ class LinearHybridTwoRecommenderOneVariableForCold(BaseItemSimilarityMatrixRecom
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
 
-        item_weights = np.empty([len(user_id_array), 25975])
+        item_weights = np.empty([len(user_id_array), 24507])
 
         for i in range(len(user_id_array)):
             if user_id_array[i] in self.users_cold:

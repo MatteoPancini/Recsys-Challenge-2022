@@ -10,6 +10,9 @@ if __name__ == '__main__':
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables, LinearHybridTwoRecommenderOneVariable
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderOneVariableForCold
+    from Recommenders.Hybrid.HandMade.Hybrid0 import Hybrid0
+    from Recommenders.Hybrid.HandMade.Hybrid1 import Hybrid1
+
     import optuna as op
     import json
     import csv
@@ -25,7 +28,7 @@ if __name__ == '__main__':
 
     header = ['recommender', 'alpha', 'MAP']
 
-    partialsFile = 'RP3beta_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'Hybrid_Cold_All' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -41,7 +44,7 @@ if __name__ == '__main__':
     URM_train_list = []
     URM_validation_list = []
 
-    for k in range(1):
+    for k in range(3):
         URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
         URM_train_list.append(URM_train)
         URM_validation_list.append(URM_validation)
@@ -54,39 +57,42 @@ if __name__ == '__main__':
 
     #Create hybrid Cold Users
 
-    recommender_ItemKNN_Cold_list = []
-    recommender_RP3beta_Cold_list = []
+
+
+    #recommender_ItemKNN_Cold_list = []
+    #recommender_RP3beta_Cold_list = []
     recommender_hybrid_Cold_list = []
 
     for index in range(len(URM_train_list)):
+        '''
         recommender_RP3beta_Cold_list.append(RP3betaRecommender(URM_train_list[index],verbose=False))
         recommender_RP3beta_Cold_list[index].fit(alpha=0.6627101454340679, beta=0.2350020032542621, topK=250)
 
         recommender_ItemKNN_Cold_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
         recommender_ItemKNN_Cold_list[index].fit(ICM=ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
+        '''
+        recommender_hybrid_Cold_list.append(Hybrid0(URM_train=URM_train_list[index], ICM=ICM))
+        recommender_hybrid_Cold_list[index].fit()
 
-        recommender_hybrid_Cold_list.append(LinearHybridTwoRecommenderOneVariable(URM_train=URM_train_list[index], Recommender_1=recommender_RP3beta_Cold_list[index],
-                                                           Recommender_2=recommender_ItemKNN_Cold_list[index]))
-        recommender_hybrid_Cold_list[index].fit(alpha=0.2584478495159924)
 
+    # Create hybrid All Users
 
-    #Create hybrid All Users
-
-    recommender_RP3beta_All_list = []
-    recommender_SlimElasticnet_All_list = []
+    #recommender_RP3beta_All_list = []
+    #recommender_SlimElasticnet_All_list = []
     recommender_hybrid_All_list = []
 
     for index in range(len(URM_train_list)):
+        '''
         recommender_SlimElasticnet_All_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
         recommender_SlimElasticnet_All_list[index].fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
 
         recommender_RP3beta_All_list.append(RP3betaRecommender(URM_train_list[index]))
         recommender_RP3beta_All_list[index].fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
+        '''
+        recommender_hybrid_All_list.append(Hybrid1(URM_train=URM_train_list[index]))
+        recommender_hybrid_All_list[index].fit()
 
-        recommender_hybrid_All_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_list[index], Recommender_1= recommender_SlimElasticnet_All_list[index], Recommender_2=recommender_RP3beta_All_list[index]))
-        recommender_hybrid_All_list[index].fit(alpha=0.18228980979705656, beta=0.5426630600143958)
-
-    #Hybrid of All with Cold
+    # Hybrid of All with Cold
 
     recommender_hybrid_list = []
 
