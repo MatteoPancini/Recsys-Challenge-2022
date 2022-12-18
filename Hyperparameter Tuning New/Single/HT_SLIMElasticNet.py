@@ -2,20 +2,24 @@ if __name__ == "__main__":
 
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import *
+    from Utils.recsys2022DataReader import createURMBinary
+    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
     import optuna as op
     import csv
-    from optuna.samplers import RandomSampler
+
+    # ---------------------------------------------------------------------------------------------------------
+    # Loading URM
+    URM = createURMBinary()
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
     header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
 
-    partialsFile = 'SlimElasticNet' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -24,12 +28,17 @@ if __name__ == "__main__":
         writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
-    # Loading URMs
+    # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train_init = load_URMTrainInit()
-    URM_train_list = load_K_URMTrain()
-    URM_validation_list = load_K_URMValid()
-    URM_test = load_URMTest()
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+
+    URM_train_list = []
+    URM_validation_list = []
+
+    for k in range(3):
+        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
+        URM_train_list.append(URM_train)
+        URM_validation_list.append(URM_validation)
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
@@ -43,7 +52,7 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 10, 400)
+        topK = trial.suggest_int("topK", 100, 500)
         alpha = trial.suggest_float("alpha", 0, 1)
         l1_ratio = trial.suggest_float("l1_ratio", 0, 1)
 

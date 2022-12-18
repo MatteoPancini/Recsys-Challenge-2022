@@ -110,6 +110,51 @@ class LinearHybridTwoRecommenderOneVariable(BaseItemSimilarityMatrixRecommender)
 
         return item_weights
 
+class LinearHybridTwoRecommenderOneVariableForCold(BaseItemSimilarityMatrixRecommender):
+    """ LinearHybridTwoRecommender
+    Hybrid of two prediction scores R = R1*alpha + R2*(1-alpha) only for cold users
+    """
+
+    def __init__(self, URM_train, Recommender_Cold, Recommender_All):
+        super(LinearHybridTwoRecommenderOneVariableForCold, self).__init__(URM_train, verbose=False)
+        self.W_sparse = None
+        self.URM_train = check_matrix(URM_train.copy(), 'csr')
+        self.Recommender_Cold = Recommender_Cold
+        self.Recommender_All = Recommender_All
+
+    def fit(self, alpha=0.5, norm_scores=False):
+        self.alpha = alpha
+
+        group_id = 0
+
+        interactions = []
+        for i in range(41629):
+            interactions.append(len(self.URM_train[i, :].nonzero()[0]))
+
+        list_group_interactions = [[0, 20], [21, 49], [50, max(interactions)]]
+
+        lower_bound = list_group_interactions[group_id][0]
+        higher_bound = list_group_interactions[group_id][1]
+
+        self.users_cold = [user_id for user_id in range(len(interactions)) if (lower_bound <= interactions[user_id] <= higher_bound)]
+
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
+
+        item_weights = np.empty([len(user_id_array), 25975])
+
+        for i in range(len(user_id_array)):
+            if user_id_array[i] in self.users_cold:
+
+                item_weights_1 = self.Recommender_Cold._compute_item_score(user_id_array[i], items_to_compute)
+                item_weights_2 = self.Recommender_All._compute_item_score(user_id_array[i], items_to_compute)
+
+                item_weight_return = item_weights_1 * self.alpha + item_weights_2 * (1 - self.alpha)
+                item_weights[i, :] = item_weight_return
+            else:
+                item_weight_return = self.Recommender_All._compute_item_score(user_id_array[i], items_to_compute)
+                item_weights[i, :] = item_weight_return
+
+        return item_weights
 
 class LinearHybridThreeRecommenderThreeVariables(BaseItemSimilarityMatrixRecommender):
     """ LinearHybridThreeRecommender
@@ -137,3 +182,5 @@ class LinearHybridThreeRecommenderThreeVariables(BaseItemSimilarityMatrixRecomme
 
         item_weights = item_weights_1 * self.alpha + item_weights_2 * self.beta + item_weights_3 * self.gamma
         return item_weights
+
+
