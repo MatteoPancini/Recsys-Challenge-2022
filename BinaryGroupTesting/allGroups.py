@@ -11,7 +11,7 @@ if __name__ == "__main__":
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
-    from Recommenders.Hybrid.LastNewGroupHybridRecommender import GroupHybrid
+    from Recommenders.Hybrid.InteractionsHybridRecommender import InteractionsHybridRecommender
 
     import matplotlib.pyplot as plt
     from Evaluation.Evaluator import EvaluatorHoldout
