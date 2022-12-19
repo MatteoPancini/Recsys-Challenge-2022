@@ -120,24 +120,24 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=500)
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
-    """
+
     alpha = study.best_params['alpha']
 
-    recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)
-    recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
+    rec1 = Hybrid0(URM_train_init, ICM)
+    rec1.fit()
 
-    recommender_RP3beta = RP3betaRecommender(URM_train_init)
-    recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
+    rec2 = RP3betaRecommender(URM_train_init)
+    rec2.fit()
 
-    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
-    recommender_Hybrid.fit(alpha=alpha, beta=beta)
+    hybrid = LinearHybridTwoRecommenderOneVariableForCold(URM_train=URM_train_init, Recommender_Cold=rec1, Recommender_All=rec2)
+    hybrid.fit(alpha=alpha)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
-    result_dict, _ = evaluator_test.evaluateRecommender(recommender_Hybrid)
+    result_dict, _ = evaluator_test.evaluateRecommender(hybrid)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_Hybrid.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/Hybrid_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
-        json.dump(parsed, json_file, indent=4)"""
+        json.dump(parsed, json_file, indent=4)
