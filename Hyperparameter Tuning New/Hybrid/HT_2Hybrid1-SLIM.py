@@ -10,7 +10,7 @@ if __name__ == '__main__':
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
-    from Recommenders.Hybrid.HandMade.Hybrid1 import Hybrid1
+    from Recommenders.Hybrid.HandMade.HybridAll import HybridAll
     from Recommenders.Hybrid.LinearHybridRecommender import *
     import optuna as op
     import json
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     recommender_SLIM_list = []
 
     for index in range(len(URM_train_list)):
-        recommender_Group1_list.append(Hybrid1(URM_train_list[index], ICM))
+        recommender_Group1_list.append(HybridAll(URM_train_list[index], ICM))
         recommender_Group1_list[index].fit()
 
         recommender_SLIM_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
 
-    rec1 = Hybrid1(URM_train_init, ICM)
+    rec1 = HybridAll(URM_train_init, ICM)
     rec1.fit()
 
     rec2 = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)

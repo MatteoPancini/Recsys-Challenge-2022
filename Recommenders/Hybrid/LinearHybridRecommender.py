@@ -2,9 +2,7 @@ from ..Recommender_utils import check_matrix
 from ..BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
 from numpy import linalg as LA
 import numpy as np
-
-
-
+from tqdm import tqdm
 
 class LinearHybridTwoRecommenderNoVariables(BaseItemSimilarityMatrixRecommender):
     """ LinearHybridTwoRecommender
@@ -125,25 +123,14 @@ class LinearHybridTwoRecommenderOneVariableForCold(BaseItemSimilarityMatrixRecom
     def fit(self, alpha=0.5, norm_scores=False):
         self.alpha = alpha
 
-        group_id = 0
-
-        interactions = []
-        for i in range(41629):
-            interactions.append(len(self.URM_train[i, :].nonzero()[0]))
-
-        list_group_interactions = [[0, 20], [21, 49], [50, max(interactions)]]
-
-        lower_bound = list_group_interactions[group_id][0]
-        higher_bound = list_group_interactions[group_id][1]
-
-        self.users_cold = [user_id for user_id in range(len(interactions)) if (lower_bound <= interactions[user_id] <= higher_bound)]
-
     def _compute_item_score(self, user_id_array, items_to_compute=None):
 
         item_weights = np.empty([len(user_id_array), 24507])
 
-        for i in range(len(user_id_array)):
-            if user_id_array[i] in self.users_cold:
+        for i in tqdm(range(len(user_id_array))):
+            interactions = len(self.URM_train[i, :].nonzero()[0])
+
+            if interactions <= 20:
 
                 item_weights_1 = self.Recommender_Cold._compute_item_score(user_id_array[i], items_to_compute)
                 item_weights_2 = self.Recommender_All._compute_item_score(user_id_array[i], items_to_compute)

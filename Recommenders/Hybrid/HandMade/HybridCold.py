@@ -7,12 +7,12 @@ from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommend
 import numpy as np
 
 
-class Hybrid0(BaseRecommender):
+class HybridCold(BaseRecommender):
 
     RECOMMENDER_NAME = "ColdHybrid"
 
     def __init__(self, URM_train, ICM):
-        super(Hybrid0, self).__init__(URM_train)
+        super(HybridCold, self).__init__(URM_train)
         self.ICM = ICM
 
 

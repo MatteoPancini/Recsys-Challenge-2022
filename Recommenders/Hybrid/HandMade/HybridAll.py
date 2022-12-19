@@ -4,16 +4,16 @@ from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
 from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
-from Recommenders.Hybrid.HandMade.Hybrid0 import Hybrid0
+from Recommenders.Hybrid.HandMade.HybridCold import HybridCold
 import numpy as np
 
 
-class Hybrid1(BaseRecommender):
+class HybridAll(BaseRecommender):
 
     RECOMMENDER_NAME = "Cold1Hybrid"
 
     def __init__(self, URM_train):
-        super(Hybrid1, self).__init__(URM_train)
+        super(HybridAll, self).__init__(URM_train)
 
 
 

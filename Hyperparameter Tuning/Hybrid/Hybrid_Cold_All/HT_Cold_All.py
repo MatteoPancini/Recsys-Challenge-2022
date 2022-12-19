@@ -10,8 +10,8 @@ if __name__ == '__main__':
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables, LinearHybridTwoRecommenderOneVariable
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderOneVariableForCold
-    from Recommenders.Hybrid.HandMade.Hybrid0 import Hybrid0
-    from Recommenders.Hybrid.HandMade.Hybrid1 import Hybrid1
+    from Recommenders.Hybrid.HandMade.HybridCold import HybridCold
+    from Recommenders.Hybrid.HandMade.HybridAll import HybridAll
 
     import optuna as op
     import json
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         recommender_ItemKNN_Cold_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
         recommender_ItemKNN_Cold_list[index].fit(ICM=ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
         '''
-        recommender_hybrid_Cold_list.append(Hybrid0(URM_train=URM_train_list[index], ICM=ICM))
+        recommender_hybrid_Cold_list.append(HybridCold(URM_train=URM_train_list[index], ICM=ICM))
         recommender_hybrid_Cold_list[index].fit()
 
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         recommender_RP3beta_All_list.append(RP3betaRecommender(URM_train_list[index]))
         recommender_RP3beta_All_list[index].fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
         '''
-        recommender_hybrid_All_list.append(Hybrid1(URM_train=URM_train_list[index]))
+        recommender_hybrid_All_list.append(HybridAll(URM_train=URM_train_list[index]))
         recommender_hybrid_All_list[index].fit()
 
     # Hybrid of All with Cold
@@ -124,17 +124,17 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
-    """
+
     alpha = study.best_params['alpha']
 
-    recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)
-    recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
+    hybridCold = HybridCold(URM_train=URM_train_init, ICM=ICM)
+    hybridCold.fit()
 
-    recommender_RP3beta = RP3betaRecommender(URM_train_init)
-    recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
+    hybridAll = HybridAll(URM_train=URM_train_init)
+    hybridAll.fit()
 
-    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
-    recommender_Hybrid.fit(alpha=alpha, beta=beta)
+    recommender_Hybrid = LinearHybridTwoRecommenderOneVariableForCold(URM_train=URM_train_init, Recommender_Cold=hybridCold, Recommender_All=hybridAll)
+    recommender_Hybrid.fit(alpha=alpha)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_Hybrid)
@@ -148,4 +148,4 @@ if __name__ == '__main__':
     with open("logs/" + recommender_Hybrid.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
-        json.dump(parsed, json_file, indent=4)"""
+        json.dump(parsed, json_file, indent=4)

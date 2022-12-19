@@ -1,17 +1,14 @@
 from Recommenders.BaseRecommender import BaseRecommender
-from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
-from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
-from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables, LinearHybridTwoRecommenderOneVariable
+from Recommenders.Hybrid.HandMade.HybridAll import HybridAll
+from Recommenders.Hybrid.HandMade.HybridCold import HybridCold
 import numpy as np
 
-
-class GroupHybrid(BaseRecommender):
+class HybridColdAllRecommender(BaseRecommender):
 
     RECOMMENDER_NAME = "HybridColdAll"
 
     def __init__(self, URM_train, ICM):
-        super(GroupHybrid, self).__init__(URM_train)
+        super(HybridColdAllRecommender, self).__init__(URM_train)
         self.ICM = ICM
         self.URM = URM_train
 
@@ -36,47 +33,29 @@ class GroupHybrid(BaseRecommender):
         #------------------
         # Cold
 
-        recommender_RP3beta = RP3betaRecommender(self.URM, verbose=False)
-        recommender_RP3beta.fit(alpha=0.6627101454340679, beta=0.2350020032542621, topK=250)
-
-        recommender_ItemKNN = ItemKNNCFRecommender(self.URM, verbose=False)
-        recommender_ItemKNN.fit(ICM=self.ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
-
-        self.hybridG0 = LinearHybridTwoRecommenderOneVariable(URM_train=self.URM_train, Recommender_1=recommender_RP3beta,
-                                                           Recommender_2=recommender_ItemKNN)
-        self.hybridG0.fit(alpha=0.2584478495159924)
+        self.hybridCold = HybridCold(URM_train=self.URM, ICM=self.ICM)
+        self.hybridCold.fit()
 
         # ------------------
         # All
 
-        recommender_SlimElasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM)
-        recommender_SlimElasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
+        self.hybridAll = HybridAll(URM_train=self.URM)
+        self.hybridAll.fit()
 
-        recommender_RP3beta = RP3betaRecommender(self.URM_train)
-        recommender_RP3beta.fit(alpha=0.5586539802603512, beta=0.49634087886207484, topK=322)
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
 
-        self.hybridAll = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM,
-                                                                              Recommender_1=recommender_SlimElasticnet,
-                                                                              Recommender_2=recommender_RP3beta)
-        self.hybridAll.fit(alpha=0.18228980979705656, beta=0.5426630600143958)
+        item_weights = np.empty([len(user_id_array), 24507])
 
+        for i in range(len(user_id_array)):
+            interactions = len(self.URM[i, :].nonzero()[0])
 
+            if interactions <= 20:
+                items_weightsCold = self.hybridCold._compute_item_score(user_id_array[i], items_to_compute)
+                items_weightAll = self.hybridAll._compute_item_score(user_id_array[i], items_to_compute)
 
-    def _compute_item_score(self, user_id_array, items_to_compute = None):
+                item_weight_return = items_weightsCold * self.alpha + items_weightAll * (1 - self.alpha)
+                item_weights[i, :] = item_weight_return
+            else:
+                item_weights = self.hybridAll._compute_item_score(user_id_array[i], items_to_compute)
 
-        items_weights1 = np.empty([len(user_id_array), 24507])
-
-        if user_id_array in self.users_cold:
-            items_weightsCold = self.hybridG0._compute_item_score(user_id_array, items_to_compute)
-            items_weightAll = self.hybridAll._compute_item_score(user_id_array, items_to_compute)
-
-            items_weights1 = items_weightAll * self.alpha + items_weightsCold * (1-self.alpha)
-        else:
-            items_weights1 = self.hybridAll._compute_item_score(user_id_array, items_to_compute)
-
-        return items_weights1
-
-
-
-
-
+        return item_weights

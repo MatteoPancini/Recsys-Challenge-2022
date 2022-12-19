@@ -3,7 +3,7 @@ if __name__ == '__main__':
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Utils.recsys2022DataReader import *
     from Utils.writeSubmission import write_submission
-    from Recommenders.Hybrid.HandMade.Hybrid1 import Hybrid1
+    from Recommenders.Hybrid.HandMade.HybridAll import HybridAll
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from datetime import datetime
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     rec1 = MultiThreadSLIM_SLIMElasticNetRecommender(URM, verbose=False)
     rec1.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
 
-    rec2 = Hybrid1(URM, ICM)
+    rec2 = HybridAll(URM, ICM)
     rec2.fit()
 
     hybrid = LinearHybridTwoRecommenderTwoVariables(URM, rec1, rec2)

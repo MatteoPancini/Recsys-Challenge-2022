@@ -7,7 +7,7 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
     from Utils.recsys2022DataReader import *
-    from Recommenders.Hybrid.HandMade.Hybrid0 import Hybrid0
+    from Recommenders.Hybrid.HandMade.HybridCold import HybridCold
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     import optuna as op
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
 
     for index in range(len(URM_train_list)):
-        recommender_COLDHybrid_list.append(Hybrid0(URM_train_list[index], ICM))
+        recommender_COLDHybrid_list.append(HybridCold(URM_train_list[index], ICM))
         recommender_COLDHybrid_list[index].fit()
 
         recommender_P3alpha_list.append(P3alphaRecommender(URM_train_list[index]))
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
 
-    rec1 = Hybrid0(URM_train_init, ICM)
+    rec1 = HybridCold(URM_train_init, ICM)
     rec1.fit()
 
     rec2 = recommender_P3alpha_list(URM_train_init)
