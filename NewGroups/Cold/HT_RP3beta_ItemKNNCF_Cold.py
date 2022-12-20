@@ -102,8 +102,8 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 1)
+        alpha = trial.suggest_float("alpha", 0.1, 0.4)
+        beta = trial.suggest_float("beta", 0.6, 1)
 
 
         for index in range(len(URM_train_list)):
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=250)
 
     # ---------------------------------------------------------------------------------------------------------
