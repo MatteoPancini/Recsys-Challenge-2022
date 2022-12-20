@@ -2,7 +2,7 @@ if __name__ == "__main__":
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderOneVariable
+    from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Utils.recsys2022DataReader import createURM, createSmallICM
     from Data_manager.split_functions.split_train_validation_random_holdout import \
         split_train_in_two_percentage_global_sample
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'MAP']
 
     partialsFile = 'RP3beta_ItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
@@ -102,17 +102,19 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
+
 
         for index in range(len(URM_train_list)):
 
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderOneVariable(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
-            recommender_hybrid_list[index].fit(alpha=alpha)
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
+            recommender_hybrid_list[index].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = ["RP3beta_ItemKNNCF", alpha, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = ["RP3beta_ItemKNNCF", alpha, beta, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -122,12 +124,13 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=250)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
     alpha = study.best_params['alpha']
+    beta = study.best_params['beta']
 
     recommender_RP3beta = RP3betaRecommender(URM_train_init, verbose=False)
     recommender_RP3beta.fit(alpha=0.6627101454340679, beta=0.2350020032542621, topK=250)
@@ -135,8 +138,8 @@ if __name__ == "__main__":
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
     recommender_ItemKNN.fit(ICM=ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
 
-    recommender_hybrid = LinearHybridTwoRecommenderOneVariable(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
-    recommender_hybrid.fit(alpha=alpha)
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
+    recommender_hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_hybrid)
