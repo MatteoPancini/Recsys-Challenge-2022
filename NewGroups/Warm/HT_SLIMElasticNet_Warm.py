@@ -2,7 +2,7 @@ if __name__ == "__main__":
 
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import createURMBinary
+    from Utils.recsys2022DataReader import createURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM = createURMBinary()
+    URM = createURM()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
@@ -91,9 +91,9 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 10, 500)
-        alpha = trial.suggest_float("alpha", 0, 1)
-        l1_ratio = trial.suggest_float("l1_ratio", 0, 1)
+        topK = trial.suggest_int("topK", 50, 250)
+        alpha = trial.suggest_float("alpha", 0.01, 0.1)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.1)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=300)
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
