@@ -9,8 +9,6 @@ def write_submission(recommender, target_users_path, out_path):
 
     targetUsers = pd.read_csv(target_users_path)['user_id']
 
-    # topNRecommendations = recommender.recommend(targetUsers.to_numpy(), cutoff=10)
-
     targetUsers = targetUsers.tolist()
 
     with open(out_path, 'w', newline='') as file:

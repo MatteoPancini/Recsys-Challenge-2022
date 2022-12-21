@@ -12,6 +12,7 @@ if __name__ == '__main__':
     import json
     import csv
     import numpy as np
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
@@ -92,11 +93,11 @@ if __name__ == '__main__':
     for index in range(len(URM_train_list)):
 
         recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
-        recommender_SlimElasticnet_list[index].fit(topK=185, alpha=0.06551072224428456, l1_ratio=0.0325741293613841)
+        recommender_SlimElasticnet_list[index].fit(topK=388, alpha=0.040569853739810924, l1_ratio=0.06497498147983727)
 
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
-        recommender_RP3beta_list[index].fit(alpha=0.572121247163269, beta=0.3107107930844788, topK=92)
+        recommender_RP3beta_list[index].fit(alpha=0.6589242531275835, beta=0.33600386450849645, topK=81)
 
     def objective(trial):
 
@@ -113,8 +114,7 @@ if __name__ == '__main__':
         MAP_result = evaluator_validation.evaluateRecommender(recommender_Hybrid_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = ['SlimRP3Beta', alpha, beta,
-                          sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = ['SlimRP3Beta', alpha, beta, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=300)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -133,10 +133,10 @@ if __name__ == '__main__':
     beta = study.best_params['beta']
 
     recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init)
-    recommender_Slim_Elasticnet.fit(topK=185, alpha=0.06551072224428456, l1_ratio=0.0325741293613841)
+    recommender_Slim_Elasticnet.fit(topK=388, alpha=0.040569853739810924, l1_ratio=0.06497498147983727)
 
     recommender_RP3beta = RP3betaRecommender(URM_train_init)
-    recommender_RP3beta.fit(alpha=0.572121247163269, beta=0.3107107930844788, topK=92)
+    recommender_RP3beta.fit(alpha=0.6589242531275835, beta=0.33600386450849645, topK=81)
 
     recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_Slim_Elasticnet, Recommender_2=recommender_RP3beta)
     recommender_Hybrid.fit(alpha=alpha, beta=beta)
