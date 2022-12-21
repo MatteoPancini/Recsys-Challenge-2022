@@ -1,6 +1,6 @@
 from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
 from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
 
 class HybridWarm(BaseRecommender):
@@ -15,7 +15,7 @@ class HybridWarm(BaseRecommender):
         self.rec1 = RP3betaRecommender(self.URM_train)
         self.rec1.fit(alpha=0.572121247163269, beta=0.3107107930844788, topK=92)
 
-        self.rec2 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        self.rec2 = SLIMElasticNetRecommender(self.URM_train)
         self.rec2.fit(topK=185, alpha=0.06551072224428456, l1_ratio=0.032574129361384)
 
         self.Hybrid = LinearHybridTwoRecommenderTwoVariables(self.URM_train, Recommender_1= self.rec2, Recommender_2=self.rec1)

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     from Recommenders.SLIM.SLIM_BPR_Python import SLIM_BPR_Python
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
     from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # Loading URM + ICM
 
     URM = createURM()
-    ICM = createSmallICM()
+    #ICM = createSmallICM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
@@ -34,11 +34,11 @@ if __name__ == "__main__":
     # Fitting of recommenders
 
     recommender_object_dict = {}
-    """
+    '''
     # SLIM Elastic Net
     SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNet.fit(topK=359, alpha=0.04183472018614359, l1_ratio=0.03260349571135893)
-    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet"""
+    recommender_object_dict['SLIM Elastic Net'] = SlimElasticNet
 
     # ItemKNNCF
     ItemKNNCFHot = ItemKNNCFRecommender(URM_train)
@@ -75,6 +75,17 @@ if __name__ == "__main__":
     SlimElasticNetHot = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
     SlimElasticNetHot.fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
     recommender_object_dict['SlimElasticNetHot'] = SlimElasticNetHot
+    '''
+    # SLIM Elastic Net
+    bestMultiSlimElasticNetHot = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train)
+    bestMultiSlimElasticNetHot.fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
+    recommender_object_dict['bestMultiSlimElasticNetHot'] = bestMultiSlimElasticNetHot
+
+    # SLIM Elastic Net
+    bestSlimElasticNetHot = SLIMElasticNetRecommender(URM_train)
+    bestSlimElasticNetHot.fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
+    recommender_object_dict['bestSlimElasticNetHot'] = bestSlimElasticNetHot
+
 
 
 

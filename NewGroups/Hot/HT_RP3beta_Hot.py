@@ -1,5 +1,3 @@
-from optuna.samplers import RandomSampler
-
 if __name__ == "__main__":
 
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
@@ -12,6 +10,7 @@ if __name__ == "__main__":
     import optuna as op
     import numpy as np
     import csv
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
@@ -93,7 +92,7 @@ if __name__ == "__main__":
 
         alpha = trial.suggest_float("alpha", 0.1, 0.9)
         beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 100, 500)
+        topK = trial.suggest_int("topK", 10, 500)
 
         for index in range(len(URM_train_list)):
             recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index], verbose=False))
