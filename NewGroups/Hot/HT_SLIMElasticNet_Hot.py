@@ -1,6 +1,6 @@
 if __name__ == "__main__":
 
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Utils.recsys2022DataReader import createURM
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
@@ -91,12 +91,12 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 10, 500)
-        alpha = trial.suggest_float("alpha", 0, 1)
-        l1_ratio = trial.suggest_float("l1_ratio", 0, 1)
+        topK = trial.suggest_int("topK", 10, 300)
+        alpha = trial.suggest_float("alpha", 0.01, 0.1)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.11)
 
         for index in range(len(URM_train_list)):
-            recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
+            recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
             recommender_SlimElasticnet_list[index].fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=300)
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     l1_ratio = study.best_params['l1_ratio']
 
-    recommender_SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init, verbose=False)
+    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init, verbose=False)
     recommender_SlimElasticNet.fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)

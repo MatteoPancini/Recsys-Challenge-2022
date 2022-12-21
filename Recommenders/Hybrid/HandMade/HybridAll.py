@@ -2,7 +2,7 @@ from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
-from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
 from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
 from Recommenders.Hybrid.HandMade.HybridCold import HybridCold
 import numpy as np
@@ -18,7 +18,7 @@ class HybridAll(BaseRecommender):
 
 
     def fit(self):
-        self.rec1 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        self.rec1 = SLIMElasticNetRecommender(self.URM_train)
         self.rec1.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893,
                                                        topK=359)
         self.rec2 = RP3betaRecommender(self.URM_train)
