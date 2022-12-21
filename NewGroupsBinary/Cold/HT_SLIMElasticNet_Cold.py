@@ -58,7 +58,7 @@ if __name__ == "__main__":
     users_not_in_group_list = []
 
     for k in range(3):
-        profile_length = np.ediff1d(URM_train_init.indptr)
+        profile_length = np.ediff1d(URM_train_list[k].indptr)
         sorted_users = np.argsort(profile_length)
 
         users_in_group = [user_id for user_id in range(len(interactions))
