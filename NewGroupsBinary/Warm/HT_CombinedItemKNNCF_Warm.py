@@ -1,18 +1,23 @@
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import *
-    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
-    import json
+    from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
+    from Utils.recsys2022DataReader import *
+    from Data_manager.split_functions.split_train_validation_random_holdout import \
+        split_train_in_two_percentage_global_sample
+    from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     import optuna as op
-    import numpy as np
+    import json
     import csv
+    from optuna.samplers import RandomSampler, GridSampler
+
     # ---------------------------------------------------------------------------------------------------------
-    # Loading URM
+    # Loading URM & ICM
+
     URM = createURMBinary()
+
+    ICM = createSmallICM()
 
     URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
@@ -20,9 +25,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
+    header = ['recommender', 'shrink', 'topk', 'similarity', 'normalization',  'MAP']
 
-    partialsFile = 'RP3beta_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'CombinedItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -34,7 +39,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 0
+    group_id = 1
+
+    cutoff = 10
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)
@@ -81,27 +88,28 @@ if __name__ == "__main__":
                                                 ignore_users_list=users_not_in_group_list)
     MAP_results_list = []
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
     def objective(trial):
 
-        recommender_RP3beta_list = []
+        recommender_ItemKNNCF_list = []
 
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
-        beta = trial.suggest_float("beta", 0.1, 0.9)
-        topK = trial.suggest_int("topK", 5, 1000)
+        topK = trial.suggest_int("topK", 100, 1000)
+        shrink = trial.suggest_int("shrink", 10, 200)
+        similarity = trial.suggest_categorical('similarity', ['rp3beta'])
+        normalization = trial.suggest_categorical("normalization", ["tfidf", "bm25plus"])
 
         for index in range(len(URM_train_list)):
-            recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index], verbose=False))
-            recommender_RP3beta_list[index].fit(alpha=alpha, topK=topK, beta=beta)
 
-        MAP_result = evaluator_validation.evaluateRecommender(recommender_RP3beta_list)
+            recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
+            recommender_ItemKNNCF_list[index].fit(ICM=ICM, shrink=shrink, topK=topK, similarity=similarity,
+                                                  normalization=normalization)
+
+        MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
         MAP_results_list.append(MAP_result)
 
-        resultsToPrint = [recommender_RP3beta_list[0].RECOMMENDER_NAME, alpha, beta, topK,
-                          sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, normalization, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -109,21 +117,23 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
+
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
     topK = study.best_params['topK']
-    alpha = study.best_params['alpha']
-    beta = study.best_params['beta']
+    shrink = study.best_params['shrink']
+    similarity = study.best_params['similarity']
+    normalization = study.best_params['normalization']
 
-    recommender_RP3beta = RP3betaRecommender(URM_train_init, verbose=False)
-    recommender_RP3beta.fit(alpha=alpha, beta=beta, topK=topK)
+    recommender_ItemKNNCF = ItemKNNCFRecommender(URM_train_init, verbose=False)
+    recommender_ItemKNNCF.fit(ICM=ICM, shrink=shrink, topK=topK, similarity=similarity, normalization=normalization)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
-    result_dict, _ = evaluator_test.evaluateRecommender(recommender_RP3beta)
+    result_dict, _ = evaluator_test.evaluateRecommender(recommender_ItemKNNCF)
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log
@@ -131,7 +141,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_RP3beta.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/Combined" + recommender_ItemKNNCF.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

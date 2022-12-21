@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 0
+    group_id = 1
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)

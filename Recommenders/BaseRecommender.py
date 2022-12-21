@@ -115,7 +115,6 @@ class BaseRecommender(object):
         scores[seen] = -np.inf
         return scores
 
-
     def _compute_item_score(self, user_id_array, items_to_compute = None):
         """
 

@@ -10,7 +10,6 @@ if __name__ == '__main__':
     import optuna as op
     import json
     import csv
-    from optuna.samplers import RandomSampler, GridSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM & ICM
@@ -65,17 +64,16 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
+    URM_train_init = load_URMTrainInit()
+    URM_train_list = load_K_URMTrain()
+    URM_validation_list = load_K_URMValid()
+    URM_test = load_URMTest()
+    ICM = createSmallICM()
 
-    URM_train_list = []
-    URM_validation_list = []
     users_not_in_group_list = []
 
     for k in range(3):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
-        URM_train_list.append(URM_train)
-        URM_validation_list.append(URM_validation)
-
-        profile_length = np.ediff1d(URM_train.indptr)
+        profile_length = np.ediff1d(URM_train_init.indptr)
         sorted_users = np.argsort(profile_length)
 
         users_in_group = [user_id for user_id in range(len(interactions))
@@ -85,8 +83,8 @@ if __name__ == '__main__':
         users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
         users_not_in_group_list.append(sorted_users[users_not_in_group_flag])
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False, ignore_users_list=users_not_in_group_list)
-
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False,
+                                                ignore_users_list=users_not_in_group_list)
     MAP_results_list = []
 
     # ---------------------------------------------------------------------------------------------------------
@@ -120,8 +118,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
-
+    study.optimize(objective, n_trials=150)
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
