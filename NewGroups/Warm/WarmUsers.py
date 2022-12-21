@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # Fitting of recommenders
 
     recommender_object_dict = {}
-
+    '''
     # RP3beta G1
     RP3betaG1 = RP3betaRecommender(URM_train)
     RP3betaG1.fit(alpha=0.6190367265325001, beta=0.4018626515197256, topK=206)
@@ -110,6 +110,17 @@ if __name__ == "__main__":
     hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train, recommender1, recommender2)
     hybrid.fit(alpha=0.13108190815550153, beta=0.4807361601575698)
     recommender_object_dict['RP3beta_ItemKNNCF_Hybrid'] = hybrid
+    '''
+
+    # RP3beta
+    highRP3beta = RP3betaRecommender(URM_train)
+    highRP3beta.fit(alpha=0.6589242531275835, beta=0.33600386450849645, topK=81)
+    recommender_object_dict['highRP3beta'] = highRP3beta
+
+    # RP3beta
+    lowRP3beta = RP3betaRecommender(URM_train)
+    lowRP3beta.fit(alpha=0.572121247163269, beta=0.3107107930844788, topK=92)
+    recommender_object_dict['Partial'] = lowRP3beta
 
     # ---------------------------------------------------------------------------------------------------------
     # Evaluation of recommenders based on group
