@@ -3,7 +3,6 @@ if __name__ == "__main__":
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Utils.recsys2022DataReader import *
-    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
@@ -114,7 +113,7 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     l1_ratio = study.best_params['l1_ratio']
 
-    recommender_SlimElasticNet = MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_init, verbose=False)
+    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init, verbose=False)
     recommender_SlimElasticNet.fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
