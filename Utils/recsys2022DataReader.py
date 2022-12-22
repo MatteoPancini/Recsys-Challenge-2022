@@ -6,7 +6,7 @@ import numpy as np
 # - ../../Input/ if run from notebooks and main Hybrid .py
 # - ../../../Input/ if run from python file
 
-urmPath = "../../Input/interactions_and_impressions.csv"
+urmPath = "Input/interactions_and_impressions.csv"
 icmTypePath = "../../Input/data_ICM_type.csv"
 icmLenghtPath = "../../Input/data_ICM_length.csv"
 '''
@@ -16,7 +16,7 @@ icmLenghtPath = "../../Input/data_ICM_length.csv"
 '''
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
-sourceDataset = '../../Dataset/'
+sourceDataset = '../../Dataset/Our/'
 
 def createURM():
     dataset = pd.read_csv(urmPath)

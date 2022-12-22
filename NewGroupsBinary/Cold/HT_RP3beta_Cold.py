@@ -3,27 +3,28 @@ if __name__ == "__main__":
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Utils.recsys2022DataReader import *
+    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
     import optuna as op
     import numpy as np
     import csv
-    import optuna.samplers
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM
-    URM_train_init = load_URMTrainInit()
-    URM_train_list = load_K_URMTrain()
-    URM_validation_list = load_K_URMValid()
-    URM_test = load_URMTest()
+    URM = createURMBinary()
+
+    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
 
-    partialsFile = 'SlimElasticNet_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'RP3beta_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -31,8 +32,9 @@ if __name__ == "__main__":
         # write the header
         writer.writerow(header)
 
+
     # ---------------------------------------------------------------------------------------------------------
-    # Profiling + K-Fold Cross Validation + Preparing training, validation, test split and evaluator
+    # Profiling
 
     group_id = 0
 
@@ -55,10 +57,19 @@ if __name__ == "__main__":
     users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
     users_not_in_group = sorted_users[users_not_in_group_flag]
 
+    # ---------------------------------------------------------------------------------------------------------
+    # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
+
+    URM_train_init = load_URMTrainInit()
+    URM_train_list = load_K_URMTrain()
+    URM_validation_list = load_K_URMValid()
+    URM_test = load_URMTest()
+    ICM = createSmallICM()
+
     users_not_in_group_list = []
 
     for k in range(3):
-        profile_length = np.ediff1d(URM_train_list[k].indptr)
+        profile_length = np.ediff1d(URM_train_init.indptr)
         sorted_users = np.argsort(profile_length)
 
         users_in_group = [user_id for user_id in range(len(interactions))
@@ -100,7 +111,7 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize', sampler=optuna.samplers.RandomSampler())
+    study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=150)
 
     # ---------------------------------------------------------------------------------------------------------

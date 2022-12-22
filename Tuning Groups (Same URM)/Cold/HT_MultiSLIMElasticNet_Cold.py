@@ -3,7 +3,6 @@ if __name__ == "__main__":
     from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Utils.recsys2022DataReader import *
-    from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
     from datetime import datetime
@@ -90,7 +89,7 @@ if __name__ == "__main__":
         l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.1)
 
         for index in range(len(URM_train_list)):
-            recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
+            recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
             recommender_SlimElasticnet_list[index].fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)

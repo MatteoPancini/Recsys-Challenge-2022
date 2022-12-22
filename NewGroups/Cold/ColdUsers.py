@@ -24,14 +24,17 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Loading URM + ICM
 
+    URMBin = createURMBinary()
     URM = createURM()
 
-    ICM = createSmallICM()
+    #ICM = createSmallICM()
 
     # ---------------------------------------------------------------------------------------------------------
     # Preparing training, validation, test split and evaluator
 
     URM_train, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
+    URMBin_train, URMBin_test = split_train_in_two_percentage_global_sample(URMBin, train_percentage=0.85)
+
 
 
     # ---------------------------------------------------------------------------------------------------------
@@ -119,6 +122,14 @@ if __name__ == "__main__":
     slim.fit(topK=214, alpha=0.22747568631546267, l1_ratio=0.007954654152433904)
     recommender_object_dict['slim'] = slim
 
+    slimMultiBin = MultiThreadSLIM_SLIMElasticNetRecommender(URMBin_train)
+    slimMultiBin.fit(topK=214, alpha=0.22747568631546267, l1_ratio=0.007954654152433904)
+    recommender_object_dict['slimMultiBin'] = slimMultiBin
+
+    slimBin = SLIMElasticNetRecommender(URMBin_train)
+    slimBin.fit(topK=214, alpha=0.22747568631546267, l1_ratio=0.007954654152433904)
+    recommender_object_dict['slimBin'] = slimBin
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Evaluation of recommenders based on group
@@ -166,7 +177,7 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('Cold Group')
+    plt.title('Cold Group Binary')
     plt.ylabel('MAP')
     plt.legend()
     plt.show()
