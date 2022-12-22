@@ -1,8 +1,8 @@
 if __name__ == "__main__":
 
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
-    from Utils.recsys2022DataReader import createURM
+    from Utils.recsys2022DataReader import *
     from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
     from Evaluation.Evaluator import EvaluatorHoldout
     import json
@@ -13,11 +13,16 @@ if __name__ == "__main__":
     from optuna.samplers import RandomSampler, GridSampler
 
     # ---------------------------------------------------------------------------------------------------------
-    # Loading URM
-    URM = createURM()
+    # Loading URMs
+    URM_train_init = load_URMTrainInit()
+    URM_train_list = load_K_URMTrain()
+    URM_validation_list = load_K_URMValid()
+    URM_test = load_URMTest()
 
-    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
 
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
+
+    MAP_results_list = []
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -60,16 +65,10 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
-    URM_train_list = []
-    URM_validation_list = []
     users_not_in_group_list = []
 
     for k in range(3):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
-        URM_train_list.append(URM_train)
-        URM_validation_list.append(URM_validation)
-
-        profile_length = np.ediff1d(URM_train_init.indptr)
+        profile_length = np.ediff1d(URM_train_list[k].indptr)
         sorted_users = np.argsort(profile_length)
 
         users_in_group = [user_id for user_id in range(len(interactions))
@@ -91,12 +90,12 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 10, 500)
-        alpha = trial.suggest_float("alpha", 0, 1)
-        l1_ratio = trial.suggest_float("l1_ratio", 0, 1)
+        topK = trial.suggest_int("topK", 50, 300)
+        alpha = trial.suggest_float("alpha", 0.01, 0.1)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.1)
 
         for index in range(len(URM_train_list)):
-            recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
+            recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
             recommender_SlimElasticnet_list[index].fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)
@@ -112,7 +111,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=2)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
