@@ -4,30 +4,26 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
     from Utils.recsys2022DataReader import *
-    from Data_manager.split_functions.split_train_validation_random_holdout import \
-        split_train_in_two_percentage_global_sample
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
     import optuna as op
     import json
     import csv
-    from optuna.samplers import RandomSampler, GridSampler
 
     # ---------------------------------------------------------------------------------------------------------
-    # Loading URM & ICM
-
-    URM = createURMBinary()
+    # Loading URM
+    URM_train_init = load_URMTrainInit()
+    URM_train_list = load_K_URMTrain()
+    URM_validation_list = load_K_URMValid()
+    URM_test = load_URMTest()
 
     ICM = createSmallICM()
-
-    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
-
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'shrink', 'topk', 'similarity', 'normalization',  'MAP']
+    header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
 
-    partialsFile = 'CombinedItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'SlimElasticNet_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -35,13 +31,10 @@ if __name__ == '__main__':
         # write the header
         writer.writerow(header)
 
-
     # ---------------------------------------------------------------------------------------------------------
-    # Profiling
+    # Profiling + K-Fold Cross Validation + Preparing training, validation, test split and evaluator
 
     group_id = 2
-
-    cutoff = 10
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)
@@ -62,19 +55,10 @@ if __name__ == '__main__':
     users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
     users_not_in_group = sorted_users[users_not_in_group_flag]
 
-    # ---------------------------------------------------------------------------------------------------------
-    # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
-
-    URM_train_init = load_URMTrainInit()
-    URM_train_list = load_K_URMTrain()
-    URM_validation_list = load_K_URMValid()
-    URM_test = load_URMTest()
-    ICM = createSmallICM()
-
     users_not_in_group_list = []
 
     for k in range(3):
-        profile_length = np.ediff1d(URM_train_init.indptr)
+        profile_length = np.ediff1d(URM_train_list[k].indptr)
         sorted_users = np.argsort(profile_length)
 
         users_in_group = [user_id for user_id in range(len(interactions))
