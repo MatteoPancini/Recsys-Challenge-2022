@@ -1,7 +1,7 @@
 from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender,SLIMElasticNetRecommender
 from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
 
 class HybridCold(BaseRecommender):
@@ -21,7 +21,7 @@ class HybridCold(BaseRecommender):
         self.rec2 = ItemKNNCFRecommender(self.URM_train)
         self.rec2.fit(ICM=self.ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
 
-        self.rec3 = MultiThreadSLIM_SLIMElasticNetRecommender(self.URM_train)
+        self.rec3 = SLIMElasticNetRecommender(self.URM_train)
         self.rec3.fit(alpha=0.22747568631546267, l1_ratio=0.007954654152433904, topK=214)
 
         self.hybrid1 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.rec1, self.rec2)
