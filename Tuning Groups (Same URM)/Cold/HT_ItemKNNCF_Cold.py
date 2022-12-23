@@ -23,32 +23,29 @@ if __name__ == '__main__':
         # write the header
         writer.writerow(header)
 
-
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
-
-    URM = createURM()
-    ICM = createSmallICM()
 
     URM_train_init = load_URMTrainInit()
     URM_train_list = load_K_URMTrain()
     URM_validation_list = load_K_URMValid()
     URM_test = load_URMTest()
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
+    ICM = createSmallICM()
 
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
     group_id = 0
 
-    profile_length = np.ediff1d(URM.indptr)
+    profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)
 
     interactions = []
     for i in range(41629):
-        interactions.append(len(URM[i, :].nonzero()[0]))
+        interactions.append(len(URM_train_init[i, :].nonzero()[0]))
 
     list_group_interactions = [[0, 20], [21, 49], [50, max(interactions)]]
 
@@ -68,7 +65,15 @@ if __name__ == '__main__':
     users_not_in_group_list = []
 
     for k in range(3):
-        users_not_in_group_list.append(users_not_in_group)
+        profile_length = np.ediff1d(URM_train_list[k].indptr)
+        sorted_users = np.argsort(profile_length)
+
+        users_in_group = [user_id for user_id in range(len(interactions))
+                          if (lower_bound <= interactions[user_id] <= higher_bound)]
+        users_in_group_p_len = profile_length[users_in_group]
+
+        users_not_in_group_flag = np.isin(sorted_users, users_in_group, invert=True)
+        users_not_in_group_list.append(sorted_users[users_not_in_group_flag])
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False,
                                                 ignore_users_list=users_not_in_group_list)
@@ -101,7 +106,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
