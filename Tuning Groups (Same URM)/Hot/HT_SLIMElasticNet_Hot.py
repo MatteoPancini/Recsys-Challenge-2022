@@ -104,7 +104,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=5)
+    study.optimize(objective, n_trials=25)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
