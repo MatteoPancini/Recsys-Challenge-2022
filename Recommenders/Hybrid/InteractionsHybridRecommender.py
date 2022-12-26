@@ -23,13 +23,13 @@ class InteractionsHybridRecommender(BaseRecommender):
         # ------------------
         # WARM
 
-        self.hybrid_warm = HybridWarm(URM_train=self.URM_train)
+        self.hybrid_warm = HybridWarm(URM_train=self.URM_train, ICM=self.ICM)
         self.hybrid_warm.fit()
 
         # ------------------
         # HOT
 
-        self.hybrid_hot = HybridHot(URM_train=self.URM_train)
+        self.hybrid_hot = HybridHot(URM_train=self.URM_train, ICM=self.ICM)
         self.hybrid_hot.fit()
 
 

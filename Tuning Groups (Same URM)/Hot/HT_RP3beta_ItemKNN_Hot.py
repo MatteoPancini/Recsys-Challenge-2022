@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Profiling
 
-    group_id = 0
+    group_id = 2
 
     profile_length = np.ediff1d(URM_train_init.indptr)
     sorted_users = np.argsort(profile_length)
@@ -88,10 +88,10 @@ if __name__ == "__main__":
     for index in range(len(URM_train_list)):
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index], verbose=False))
-        recommender_RP3beta_list[index].fit(alpha=0.8815611011233834, beta=0.23472570066237713, topK=225)
+        recommender_RP3beta_list[index].fit(alpha=0.6078606485515248, beta=0.32571505237450094, topK=52)
 
         recommender_ItemKNN_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
-        recommender_ItemKNN_list[index].fit(ICM=ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
+        recommender_ItemKNN_list[index].fit(ICM=ICM, topK=461, shrink=10, similarity='rp3beta', normalization='tfidf')
 
     def objective(trial):
 
@@ -127,10 +127,10 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     recommender_RP3beta = RP3betaRecommender(URM_train_init, verbose=False)
-    recommender_RP3beta.fit(alpha=0.8815611011233834, beta=0.23472570066237713, topK=225)
+    recommender_RP3beta.fit(alpha=0.6078606485515248, beta=0.32571505237450094, topK=52)
 
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
-    recommender_ItemKNN.fit(ICM=ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
+    recommender_ItemKNN.fit(ICM=ICM, topK=461, shrink=10, similarity='rp3beta', normalization='tfidf')
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
