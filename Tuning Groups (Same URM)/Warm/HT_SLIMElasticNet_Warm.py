@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 50, 300)
+        topK = trial.suggest_int("topK", 260, 280)
         alpha = trial.suggest_float("alpha", 0.01, 0.1)
         l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.1)
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=10)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
