@@ -1,6 +1,7 @@
 if __name__ == "__main__":
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.KNN.ItemKNNCFRecommenderPLUS import ItemKNNCFRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -15,9 +16,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
+    header = ['recommender', 'alpha', 'beta' 'MAP']
 
-    partialsFile = 'RP3beta_ItemKNNCF' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'SLIM_RP3beta_ItemKNNCF' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -83,15 +84,25 @@ if __name__ == "__main__":
 
     recommender_RP3beta_list = []
     recommender_ItemKNN_list = []
+    recommender_hybrid_RP3beta_ItemKNN_list = []
+    recommender_SLIM_list = []
     MAP_results_list = []
 
     for index in range(len(URM_train_list)):
 
+        #Fit RP3beta-ItemKNN hybrid
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[index], verbose=False))
         recommender_RP3beta_list[index].fit(alpha=0.8815611011233834, beta=0.23472570066237713, topK=225)
 
         recommender_ItemKNN_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
         recommender_ItemKNN_list[index].fit(ICM=ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
+
+        recommender_hybrid_RP3beta_ItemKNN_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
+        recommender_hybrid_RP3beta_ItemKNN_list[index].fit(alpha=0.8190677327782062, beta=0.686509249107007)
+
+        #Fit SLIMElasticnet
+        recommender_SLIM_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
+        recommender_SLIM_list[index].fit(topK=299, alpha=0.057940560184114316, l1_ratio=0.06563962491123715)
 
     def objective(trial):
 
@@ -102,7 +113,7 @@ if __name__ == "__main__":
 
         for index in range(len(URM_train_list)):
 
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_hybrid_RP3beta_ItemKNN_list[index], Recommender_2=recommender_SLIM_list[index]))
             recommender_hybrid_list[index].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
@@ -117,7 +128,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=400)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -132,7 +143,13 @@ if __name__ == "__main__":
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
     recommender_ItemKNN.fit(ICM=ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
 
-    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
+    recommender_hybrid_RP3beta_ItemKNN = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
+    recommender_hybrid_RP3beta_ItemKNN.fit(alpha=0.8190677327782062, beta=0.686509249107007)
+
+    recommender_SLIM = SLIMElasticNetRecommender(URM_train_init, verbose=False)
+    recommender_SLIM.fit(topK=299, alpha=0.057940560184114316, l1_ratio=0.06563962491123715)
+
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_hybrid_RP3beta_ItemKNN, Recommender_2=recommender_SLIM)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)
@@ -144,7 +161,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + "RP3beta_ItemKNNCF" + "_logs_" + datetime.now().strftime(
+    with open("logs/" + "SLIM_RP3beta_ItemKNNCF" + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
