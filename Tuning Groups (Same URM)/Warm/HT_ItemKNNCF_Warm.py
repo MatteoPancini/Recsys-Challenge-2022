@@ -89,8 +89,8 @@ if __name__ == '__main__':
 
         topK = trial.suggest_int("topK", 100, 2000)
         shrink = trial.suggest_int("shrink", 10, 200)
-        similarity = trial.suggest_categorical('similarity', ['rp3beta'])
-        normalization = trial.suggest_categorical("normalization", ["tfidf", "bm25plus"])
+        similarity = trial.suggest_categorical('similarity', ['cosine', 'dice', 'jaccard', 'asym', 'rp3beta'])
+        normalization = trial.suggest_categorical("normalization", ["tfidf", "bm25plus", "bm25"])
 
         for index in range(len(URM_train_list)):
             recommender_ItemKNNCF_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))

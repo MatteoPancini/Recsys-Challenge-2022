@@ -36,48 +36,36 @@ if __name__ == "__main__":
     # --------------------------
     # OLD best
 
-    # RP3 BETA MIGLIORATO
+
+    # RP3 beta MIGLIORATO
     '''
     oldRP3 = RP3betaRecommender(URM_train_init)
-    oldRP3.fit(alpha=0.6627101454340679, beta=0.2350020032542621, topK=250)
+    oldRP3.fit(alpha=0.7136052911660057, beta=0.44828831909194655, topK=54)
     recommender_object_dict['oldRP3'] = oldRP3
     '''
 
-
-
-    #oldItemKNN = ItemKNNCFRecommender(URM_train_init)
-    #oldItemKNN.fit(ICM=ICM, topK=5893, shrink=50, similarity='rp3beta', normalization='tfidf')
-    #recommender_object_dict['oldItemKNN'] = oldItemKNN
-
     # SLIM MIGLIORATO
     '''
-    oldSLIM = SLIMElasticNetRecommender(URM_train_init)
-    oldSLIM.fit(alpha=0.22747568631546267, l1_ratio=0.007954654152433904, topK=214)
-    recommender_object_dict['oldSLIM'] = oldSLIM
+    oldSlim = SLIMElasticNetRecommender(URM_train_init)
+    oldSlim.fit(topK=429, alpha=0.0047217460142242595, l1_ratio=0.501517968826842)
+    recommender_object_dict['oldSlim'] = oldSlim
     '''
 
     # --------------------------
     # New Tuning
 
-    # BEST RP3 Beta
-    '''
-    bestRP3 = RP3betaRecommender(URM_train_init)
-    bestRP3.fit(alpha=0.8815611011233834, beta=0.23472570066237713, topK=225)
-    recommender_object_dict['bestRP3'] = bestRP3
-    '''
-
     # BEST SLIM -> from MULTI
     '''
     bestSlim = SLIMElasticNetRecommender(URM_train_init)
-    bestSlim.fit(topK=299, alpha=0.057940560184114316, l1_ratio=0.06563962491123715)
+    bestSlim.fit(topK=298, alpha=0.041853285688557666, l1_ratio=0.01653973129200162)
     recommender_object_dict['bestSlim'] = bestSlim
     '''
-
-
-    #bestItemKNNCFG0 = ItemKNNCFRecommender(URM_train_init)
-    #bestItemKNNCFG0.fit(ICM, shrink=176, topK=1353, similarity='rp3beta', normalization='tfidf')
-    #recommender_object_dict['bestItemKNNCFG0'] = bestItemKNNCFG0
-
+    # BEST RP3 beta
+    '''
+    bestRP3 = RP3betaRecommender(URM_train_init)
+    bestRP3.fit(alpha=0.6078606485515248, beta=0.32571505237450094, topK=52)
+    recommender_object_dict['bestRP3'] = bestRP3
+    '''
 
 
 
@@ -86,7 +74,7 @@ if __name__ == "__main__":
 
     MAP_recommender_per_group = {}
 
-    group_id = 0
+    group_id = 2
 
     cutoff = 10
 
@@ -127,7 +115,7 @@ if __name__ == "__main__":
         results = MAP_recommender_per_group[label]
         finalResults[label] = results
         plt.scatter(x=label, y=results, label=label)
-    plt.title('Cold Group')
+    plt.title('Hot Group')
     plt.ylabel('MAP')
     plt.legend()
     plt.show()
