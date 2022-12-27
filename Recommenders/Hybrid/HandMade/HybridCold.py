@@ -21,23 +21,18 @@ class HybridCold(BaseRecommender):
         self.rec2 = ItemKNNCFRecommender(self.URM_train)
         self.rec2.fit(ICM=self.ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
 
-        #self.rec3 = SLIMElasticNetRecommender(self.URM_train)
-        #self.rec3.fit(alpha=0.22747568631546267, l1_ratio=0.007954654152433904, topK=214)
+        self.rec3 = SLIMElasticNetRecommender(self.URM_train)
+        self.rec3.fit(topK=299, alpha=0.057940560184114316, l1_ratio=0.06563962491123715)
 
         self.hybrid1 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.rec1, self.rec2)
         self.hybrid1.fit(alpha=0.8190677327782062, beta=0.686509249107007)
 
-        #self.hybrid2 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.hybrid1, self.rec3)
-        #self.hybrid2.fit(alpha=0.5973236168542123, beta=0.057935940935008756)
+        self.hybrid2 = LinearHybridTwoRecommenderTwoVariables(self.URM_train, self.hybrid1, self.rec3)
+        self.hybrid2.fit(alpha=0.997101180232236, beta=0.31968335027659)
 
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):
 
-        item_weights = self.hybrid1._compute_item_score(user_id_array, items_to_compute)
+        item_weights = self.hybrid2._compute_item_score(user_id_array, items_to_compute)
 
         return item_weights
-
-
-
-
-
