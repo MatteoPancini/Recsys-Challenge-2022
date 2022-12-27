@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'MAP']
 
     partialsFile = 'RP3beta_ItemKNNCF' + datetime.now().strftime('%b%d_%H-%M-%S')
 

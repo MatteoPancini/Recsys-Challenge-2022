@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
 
-    header = ['recommender', 'alpha', 'beta' 'MAP']
+    header = ['recommender', 'alpha', 'beta', 'MAP']
 
     partialsFile = 'SLIM_RP3beta_ItemKNNCF' + datetime.now().strftime('%b%d_%H-%M-%S')
 
@@ -128,8 +128,8 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study.optimize(objective, n_trials=400)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -138,16 +138,16 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     recommender_RP3beta = RP3betaRecommender(URM_train_init, verbose=False)
-    recommender_RP3beta.fit(alpha=0.8815611011233834, beta=0.23472570066237713, topK=225)
+    recommender_RP3beta.fit(alpha=0.7849910963981444, beta=0.3219406144420833, topK=64)
 
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
-    recommender_ItemKNN.fit(ICM=ICM, topK=1296, shrink=51, similarity='rp3beta', normalization='tfidf')
+    recommender_ItemKNN.fit(ICM=ICM, topK=377, shrink=10, similarity='rp3beta', normalization='tfidf')
 
     recommender_hybrid_RP3beta_ItemKNN = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
-    recommender_hybrid_RP3beta_ItemKNN.fit(alpha=0.8190677327782062, beta=0.686509249107007)
+    recommender_hybrid_RP3beta_ItemKNN.fit(alpha=0.6745409371119246, beta=0.19918230600969603)
 
     recommender_SLIM = SLIMElasticNetRecommender(URM_train_init, verbose=False)
-    recommender_SLIM.fit(topK=299, alpha=0.057940560184114316, l1_ratio=0.06563962491123715)
+    recommender_SLIM.fit(topK=258, alpha=0.035237980092119314, l1_ratio=0.05512644878845981)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=URM_train_init, Recommender_1=recommender_hybrid_RP3beta_ItemKNN, Recommender_2=recommender_SLIM)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
