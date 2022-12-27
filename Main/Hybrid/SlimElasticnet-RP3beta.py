@@ -1,7 +1,7 @@
 if __name__ == '__main__':
 
     from Utils.recsys2022DataReader import createURM
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Utils.writeSubmission import write_submission
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     URM = createURM()
 
     # Create the recommenders
-    recommender_Slim_Elasticnet = MultiThreadSLIM_SLIMElasticNetRecommender(URM)
+    recommender_Slim_Elasticnet = SLIMElasticNetRecommender(URM)
     recommender_Slim_Elasticnet.fit(alpha=0.04183472018614359, l1_ratio=0.03260349571135893, topK=359)
 
     recommender_RP3beta = RP3betaRecommender(URM)
