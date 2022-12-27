@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # Creating CSV header
 
     header = ['recommender', 'shrink', 'topk', 'similarity', 'normalization', 'MAP']
-    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'ItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -107,8 +107,8 @@ if __name__ == '__main__':
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=250)
+    study = op.create_study(direction='maximize')
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # Creating CSV header
 
     header = ['recommender', 'shrink', 'topk', 'similarity', 'normalization', 'MAP']
-    partialsFile = 'partials_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'ItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
