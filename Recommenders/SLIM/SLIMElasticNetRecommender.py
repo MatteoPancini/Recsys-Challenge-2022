@@ -111,7 +111,7 @@ class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
             new_time_value, new_time_unit = seconds_to_biggest_unit(elapsed_time)
 
 
-            if time.time() - start_time_printBatch > 300 or currentItem == n_items-1:
+            if time.time() - start_time_printBatch > 60 or currentItem == n_items-1:
                 self._print("Processed {} ({:4.1f}%) in {:.2f} {}. Items per second: {:.2f}".format(
                     currentItem+1,
                     100.0* float(currentItem+1)/n_items,

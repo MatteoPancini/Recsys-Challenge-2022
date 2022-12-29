@@ -260,3 +260,17 @@ def load_K_BinURMValid():
     URM_val_list.append(sp.load_npz(binsourceDataset + 'URM_val2.npz'))
 
     return URM_val_list
+
+def load_1K_BinURMTrain():
+    URM_train_list = []
+
+    URM_train_list.append(sp.load_npz(binsourceDataset + 'URM_train0.npz'))
+
+    return URM_train_list
+
+def load_1K_BinURMValid():
+    URM_val_list = []
+
+    URM_val_list.append(sp.load_npz(binsourceDataset + 'URM_val0.npz'))
+
+    return URM_val_list
