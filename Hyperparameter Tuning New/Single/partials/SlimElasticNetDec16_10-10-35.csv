@@ -1,2 +1,0 @@
-recommender,alpha,l1_ratio,TopK,MAP
-SLIMElasticNetRecommender,0.8628553593722179,0.9959757474467217,376,3.3500130284517415e-05
