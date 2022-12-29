@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
 
-    partialsFile = 'RP3beta_Binary' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'RP3beta_Normal' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_RP3beta.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/" + recommender_RP3beta.RECOMMENDER_NAME + "_Normal_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
