@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     header = ['recommender', 'alpha', 'l1_ratio', 'TopK', 'MAP']
 
-    partialsFile = 'BinMultiSlimElasticNet_' + datetime.now().strftime('%b%d_%H-%M-%S')
+    partialsFile = 'MultiSlimElasticNet_' + datetime.now().strftime('%b%d_%H-%M-%S')
 
     with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_K_BinURMTrain()
-    URM_validation_list = load_K_BinURMValid()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/BinMulti" + recommender_SlimElasticNet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/Multi" + recommender_SlimElasticNet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

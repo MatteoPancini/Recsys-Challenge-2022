@@ -26,10 +26,10 @@ if __name__ == "__main__":
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
-    URM_train_init = load_URMTrainInit()
-    URM_train_list = load_K_URMTrain()
-    URM_validation_list = load_K_URMValid()
-    URM_test = load_URMTest()
+    URM_train_init = load_BinURMTrainInit()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
+    URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
@@ -41,8 +41,8 @@ if __name__ == "__main__":
         recommender_SlimElasticnet_list = []
 
         topK = trial.suggest_int("topK", 50, 300)
-        alpha = trial.suggest_float("alpha", 0.01, 0.1)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.01, 0.1)
+        alpha = trial.suggest_float("alpha", 0.001, 0.01)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.001, 0.01)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
