@@ -98,8 +98,8 @@ if __name__ == "__main__":
         recommender_ItemKNN_list[index].fit(ICM=ICM, topK=461, shrink=10, similarity='rp3beta', normalization='tfidf')
 
         recommender_hybrid_RP3beta_ItemKNN_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
-        recommender_hybrid_RP3beta_ItemKNN_list[index].fit(alpha=0.8476487776384586, beta=0.1505476499435428)
-
+        #recommender_hybrid_RP3beta_ItemKNN_list[index].fit(alpha=0.8476487776384586, beta=0.1505476499435428)
+        recommender_hybrid_RP3beta_ItemKNN_list[index].fit(alpha=0.18695880357125239, beta=0.023313251716728045)
 
         #Fit SLIMElasticnet
         recommender_SLIM_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=400)
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

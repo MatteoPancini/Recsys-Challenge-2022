@@ -91,7 +91,7 @@ if __name__ == "__main__":
         recommender_RP3beta_list[index].fit(alpha=0.7849910963981444, beta=0.3219406144420833, topK=64)
 
         recommender_ItemKNN_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
-        recommender_ItemKNN_list[index].fit(ICM=ICM, topK=377, shrink=10, similarity='rp3beta', normalization='tfidf')
+        recommender_ItemKNN_list[index].fit(ICM=ICM, topK=1992, shrink=189, similarity='jaccard', normalization='bm25')
 
     def objective(trial):
 
@@ -117,8 +117,8 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=400)
+    study = op.create_study(direction='maximize')
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     recommender_RP3beta.fit(alpha=0.7849910963981444, beta=0.3219406144420833, topK=64)
 
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
-    recommender_ItemKNN.fit(ICM=ICM, topK=377, shrink=10, similarity='rp3beta', normalization='tfidf')
+    recommender_ItemKNN.fit(ICM=ICM, topK=1992, shrink=189, similarity='jaccard', normalization='bm25')
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
     recommender_hybrid.fit(alpha=alpha, beta=beta)

@@ -16,4 +16,4 @@ if __name__ == '__main__':
     # Write the submission file
     write_submission(recommender=recommender_Hybrid,
                      target_users_path="../../Input/data_target_users_test.csv",
-                     out_path='../../Output/{}_submission.csv'.format('LASTHybrid-Group-Interactions'))
+                     out_path='../../Output/{}2712_submission.csv'.format('Hybrid-Group-Interactions'))
