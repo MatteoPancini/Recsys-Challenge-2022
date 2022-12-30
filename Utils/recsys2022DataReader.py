@@ -5,19 +5,19 @@ import numpy as np
 # path are:
 # - ../../Input/ if run from notebooks and main Hybrid .py
 # - ../../../Input/ if run from python file
+'''
+urmPath = "../../Input/interactions_and_impressions.csv"
+icmTypePath = "../Input/data_ICM_type.csv"
+icmLenghtPath = "../Input/data_ICM_length.csv"
+'''
+urmPath = "../Input/interactions_and_impressions.csv"
+icmTypePath = "../../Input/data_ICM_type.csv"
+icmLenghtPath = "../../Input/data_ICM_length.csv"
 
-urmPath = "../../Input/interactions_and_impressions.csv"
-icmTypePath = "../../Input/data_ICM_type.csv"
-icmLenghtPath = "../../Input/data_ICM_length.csv"
-'''
-urmPath = "../../Input/interactions_and_impressions.csv"
-icmTypePath = "../../Input/data_ICM_type.csv"
-icmLenghtPath = "../../Input/data_ICM_length.csv"
-'''
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 sourceDataset = '../Dataset/Our/'
-binsourceDataset ='../Dataset/'
+binsourceDataset ='../../Dataset/'
 
 def createURM():
     dataset = pd.read_csv(urmPath)
@@ -243,7 +243,7 @@ def load_BinURMTest():
     return URM_test
 
 
-def load_K_BinURMTrain():
+def load_3K_BinURMTrain():
     URM_train_list = []
 
     URM_train_list.append(sp.load_npz(binsourceDataset + 'URM_train0.npz'))
@@ -252,7 +252,7 @@ def load_K_BinURMTrain():
 
     return URM_train_list
 
-def load_K_BinURMValid():
+def load_3K_BinURMValid():
     URM_val_list = []
 
     URM_val_list.append(sp.load_npz(binsourceDataset + 'URM_val0.npz'))

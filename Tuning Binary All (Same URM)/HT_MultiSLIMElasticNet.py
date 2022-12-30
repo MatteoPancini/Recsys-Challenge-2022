@@ -31,7 +31,7 @@ if __name__ == "__main__":
     URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10])
 
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 50, 300)
-        alpha = trial.suggest_float("alpha", 0.001, 0.01)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.001, 0.01)
+        topK = trial.suggest_int("topK", 240, 255)
+        alpha = trial.suggest_float("alpha", 0.002, 0.004)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.009, 0.0099)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -69,11 +69,14 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     l1_ratio = study.best_params['l1_ratio']
 
-    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init, verbose=False)
+    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init)
     recommender_SlimElasticNet.fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_SlimElasticNet)
+
+    recommender_SlimElasticNet.save_model('../Models/', recommender_SlimElasticNet.RECOMMENDER_NAME + datetime.now().strftime(
+        '%b%d_%H-%M-%S'))
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log
