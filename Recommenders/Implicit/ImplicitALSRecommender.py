@@ -6,7 +6,7 @@ from ..Recommender_utils import check_matrix
 import numpy as np
 
 class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
-    """ImplicitALSRecommender recommender"""
+    """IALSRecommender recommender"""
 
     RECOMMENDER_NAME = "ImplicitALSRecommender"
 
