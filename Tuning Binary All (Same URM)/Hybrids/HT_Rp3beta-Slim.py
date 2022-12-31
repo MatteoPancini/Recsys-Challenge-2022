@@ -29,8 +29,8 @@ if __name__ == "__main__":
     # Loading URMs
 
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_1K_BinURMTrain()
-    URM_validation_list = load_1K_BinURMValid()
+    URM_train_list = load_3K_BinURMTrain()
+    URM_validation_list = load_3K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -46,10 +46,8 @@ if __name__ == "__main__":
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
         recommender_RP3beta_list[i].fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
 
-
-        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].load_model(folder_path='../../Models/', file_name='1k'+recommender_Slim_list[i].RECOMMENDER_NAME)
-
+        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i], verbose=False))
+        recommender_Slim_list[i].fit(topK=211, alpha=0.003520668066481557, l1_ratio=0.007825415595326402)
 
     def objective(trial):
 
@@ -74,7 +72,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=300)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -86,7 +84,8 @@ if __name__ == "__main__":
     rec1.fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
-    rec2.load_model(folder_path='../../Models/', file_name='init' + rec2.RECOMMENDER_NAME)
+    #rec2.load_model(folder_path='../../Models/', file_name='init' + rec2.RECOMMENDER_NAME)
+    rec2.fit(topK=211, alpha=0.003520668066481557, l1_ratio=0.007825415595326402)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
