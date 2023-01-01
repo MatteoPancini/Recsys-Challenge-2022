@@ -12,6 +12,7 @@ if __name__ == "__main__":
     from datetime import datetime
     import optuna as op
     import json
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -29,11 +30,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_1K_BinURMTrain()
-    URM_validation_list = load_1K_BinURMValid()
+    URM_train_list = load_3K_BinURMTrain()
+    URM_validation_list = load_3K_BinURMValid()
     URM_test = load_BinURMTest()
-
-    ICM = createSmallICM()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
@@ -50,16 +49,16 @@ if __name__ == "__main__":
     for i in range(len(URM_train_list)):
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+        recommender_RP3beta_list[i].fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
 
         recommender_P3alpha_list.append(P3alphaRecommender(URM_train=URM_train_list[i]))
         recommender_P3alpha_list[i].fit(topK=116, alpha=0.8763131065621229)
 
         recommender_hybrid1_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_RP3beta_list[i], Recommender_2=recommender_P3alpha_list[i] ))
-        recommender_hybrid1_list[i].fit(alpha=0.8227970782220282, beta=0.18062863114723637)
+        recommender_hybrid1_list[i].fit(alpha=0.5042061133754471, beta=0.1229236356527148)
 
         recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].load_model(folder_path='../../Models/', file_name='1k'+recommender_Slim_list[i].RECOMMENDER_NAME)
+        recommender_Slim_list[i].fit(topK=241, alpha=0.0031642653228324906, l1_ratio=0.009828283497311959)
 
 
     def objective(trial):
@@ -84,7 +83,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -94,16 +93,16 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec01 = RP3betaRecommender(URM_train_init)
-    rec01.fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+    rec01.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
 
     rec02 = P3alphaRecommender(URM_train_init)
     rec02.fit(topK=116, alpha=0.8763131065621229)
 
     rec1 = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec01, Recommender_2=rec02)
-    rec1.fit(alpha=0.8227970782220282, beta=0.18062863114723637)
+    rec1.fit(alpha=0.5042061133754471, beta=0.1229236356527148)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
-    rec2.load_model(folder_path='../../Models/', file_name='init'+recommender_Slim_list[i].RECOMMENDER_NAME)
+    rec2.fit(topK=241, alpha=0.0031642653228324906, l1_ratio=0.009828283497311959)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
