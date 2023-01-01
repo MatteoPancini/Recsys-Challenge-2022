@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=1)
 
 
     # ---------------------------------------------------------------------------------------------------------
@@ -72,10 +72,6 @@ if __name__ == '__main__':
     iterations = study.best_params["iterations"]
     regularization = study.best_params["regularization"]
 
-    recommender1k_IALS = ImplicitALSRecommender(URM_train_list[0])
-    recommender1k_IALS.fit(alpha=alpha, factors=factors,
-                         iterations=iterations, regularization=regularization)
-
     recommender_IALS = ImplicitALSRecommender(URM_train_init)
     recommender_IALS.fit(alpha=alpha, factors=factors,
                                              iterations=iterations, regularization=regularization)
@@ -83,11 +79,6 @@ if __name__ == '__main__':
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], verbose=False)
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_IALS)
 
-    recommender1k_IALS.save_model('../Models/1k', recommender_IALS.RECOMMENDER_NAME + datetime.now().strftime(
-        '%b%d_%H-%M-%S'))
-
-    recommender_IALS.save_model('../Models/', recommender_IALS.RECOMMENDER_NAME + datetime.now().strftime(
-            '%b%d_%H-%M-%S'))
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log

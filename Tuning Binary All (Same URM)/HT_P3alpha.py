@@ -38,8 +38,8 @@ if __name__ == '__main__':
 
         recommender_P3alpha_list = []
 
-        topK = trial.suggest_int("topK", 100, 1000)
-        alpha = trial.suggest_float("alpha", 0, 1)
+        topK = trial.suggest_int("topK", 110, 120)
+        alpha = trial.suggest_float("alpha", 0.87, 0.88)
 
         for index in range(len(URM_train_list)):
 

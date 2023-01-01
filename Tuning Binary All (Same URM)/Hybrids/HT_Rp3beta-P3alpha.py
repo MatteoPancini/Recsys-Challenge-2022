@@ -45,7 +45,7 @@ if __name__ == "__main__":
     for i in range(len(URM_train_list)):
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+        recommender_RP3beta_list[i].fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
 
         recommender_P3alpha_list.append(P3alphaRecommender(URM_train=URM_train_list[i]))
         recommender_P3alpha_list[i].fit(topK=116, alpha=0.8763131065621229)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = RP3betaRecommender(URM_train_init)
-    rec1.fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+    rec1.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
 
     rec2 = P3alphaRecommender(URM_train_init)
     rec2.fit(topK=116, alpha=0.8763131065621229)

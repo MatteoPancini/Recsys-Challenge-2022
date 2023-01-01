@@ -1,15 +1,15 @@
 if __name__ == '__main__':
 
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Utils.recsys2022DataReader import createURM
+    from Utils.recsys2022DataReader import *
     from Utils.writeSubmission import write_submission
 
     # Loading URM
-    URM = createURM()
+    URM = createURMBinary()
 
     #Create the recommender
     recommender = RP3betaRecommender(URM, verbose=False)
-    recommender.fit()
+    recommender.fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
 
     #Write the submission file
     write_submission(recommender=recommender,

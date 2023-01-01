@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=1)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

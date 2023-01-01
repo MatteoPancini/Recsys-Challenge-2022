@@ -41,8 +41,8 @@ if __name__ == "__main__":
         recommender_SlimElasticnet_list = []
 
         topK = trial.suggest_int("topK", 240, 255)
-        alpha = trial.suggest_float("alpha", 0.002, 0.004)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.009, 0.0099)
+        alpha = trial.suggest_float("alpha", 0.003, 0.0035)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.0092, 0.0098)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=50)
+    study = op.create_study(direction='maximize')
+    study.optimize(objective, n_trials=30)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

@@ -39,9 +39,9 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 50, 300)
-        alpha = trial.suggest_float("alpha", 0.00001, 0.01)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.00001, 0.01)
+        topK = trial.suggest_int("topK", 240, 245)
+        alpha = trial.suggest_float("alpha", 0.00316, 0.0032)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.00981, 0.009829)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))

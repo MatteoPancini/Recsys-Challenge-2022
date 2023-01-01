@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
         recommender_RpP3beta_list = []
 
-        topK = trial.suggest_int("topK", 50, 1000)
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 1)
+        topK = trial.suggest_int("topK", 75, 80)
+        alpha = trial.suggest_float("alpha", 0.84, 0.85)
+        beta = trial.suggest_float("beta", 0.30, 0.32)
 
         for index in range(len(URM_train_list)):
 
