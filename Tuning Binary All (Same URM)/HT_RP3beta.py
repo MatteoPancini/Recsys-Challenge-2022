@@ -8,6 +8,7 @@ if __name__ == '__main__':
     import optuna as op
     import json
     import csv
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -38,9 +39,9 @@ if __name__ == '__main__':
 
         recommender_RpP3beta_list = []
 
-        topK = trial.suggest_int("topK", 75, 80)
-        alpha = trial.suggest_float("alpha", 0.84, 0.85)
-        beta = trial.suggest_float("beta", 0.30, 0.32)
+        topK = trial.suggest_int("topK", 77, 77)
+        alpha = trial.suggest_float("alpha", 0.8401, 0.8402)
+        beta = trial.suggest_float("beta", 0.3071, 0.3079)
 
         for index in range(len(URM_train_list)):
 
@@ -59,8 +60,8 @@ if __name__ == '__main__':
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=150)
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study.optimize(objective, n_trials=10)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

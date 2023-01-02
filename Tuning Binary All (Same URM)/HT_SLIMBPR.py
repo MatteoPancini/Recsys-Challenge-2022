@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 5, 1000)
-        epochs = trial.suggest_int("epochs", 10, 100)
+        topK = trial.suggest_int("topK", 5, 100)
+        epochs = trial.suggest_int("epochs", 130, 200)
         lambda_i = trial.suggest_float("lambda_i", 1e-5, 1e-2)
         lambda_j = trial.suggest_float("lambda_j", 1e-5, 1e-2)
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_SlimElasticnet_list)
 
-        resultsToPrint = [recommender_SlimElasticnet_list[0].RECOMMENDER_NAME, topK, epochs, lambda_i, lambda_j,
+        resultsToPrint = ["SLIMBPR", topK, epochs, lambda_i, lambda_j,
                           sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=5)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_SlimBPR.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/SLIMBPR_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)

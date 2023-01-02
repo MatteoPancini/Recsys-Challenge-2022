@@ -9,6 +9,8 @@ if __name__ == "__main__":
     import optuna as op
     import numpy as np
     import csv
+    from optuna.samplers import RandomSampler
+
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -58,7 +60,7 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize')
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
     study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------

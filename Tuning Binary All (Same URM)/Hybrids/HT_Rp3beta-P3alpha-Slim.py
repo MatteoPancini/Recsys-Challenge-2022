@@ -65,8 +65,8 @@ if __name__ == "__main__":
 
         recommender_hybrid_list = []
 
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 1)
+        alpha = trial.suggest_float("alpha", 0, 0.6)
+        beta = trial.suggest_float("beta", 0.6, 1)
 
         for i in range(len(URM_train_list)):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_hybrid1_list[i], Recommender_2=recommender_Slim_list[i]))
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
 
-        resultsToPrint = ["Slim-Ials", alpha, beta, sum(MAP_result) / len(MAP_result)]
+        resultsToPrint = ["RP3betaP3alpha-Slim", alpha, beta, sum(MAP_result) / len(MAP_result)]
 
         with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=50)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

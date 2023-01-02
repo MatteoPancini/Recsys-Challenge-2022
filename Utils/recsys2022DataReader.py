@@ -17,7 +17,7 @@ icmLenghtPath = "../../Input/data_ICM_length.csv"
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 sourceDataset = '../Dataset/Our/'
-binsourceDataset ='../Dataset/'
+binsourceDataset ='../../Dataset/'
 
 def createURM():
     dataset = pd.read_csv(urmPath)

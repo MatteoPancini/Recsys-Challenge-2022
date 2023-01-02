@@ -81,7 +81,7 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = RP3betaRecommender(URM_train_init)
-    rec1.fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+    rec1.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
     rec2.fit(topK=241, alpha=0.0031642653228324906, l1_ratio=0.009828283497311959)
