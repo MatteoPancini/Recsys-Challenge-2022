@@ -8,7 +8,6 @@ if __name__ == '__main__':
     import optuna as op
     import json
     import csv
-    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -26,8 +25,8 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_3K_BinURMTrain()
-    URM_validation_list = load_3K_BinURMValid()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -39,9 +38,9 @@ if __name__ == '__main__':
 
         recommender_RpP3beta_list = []
 
-        topK = trial.suggest_int("topK", 77, 77)
-        alpha = trial.suggest_float("alpha", 0.8401, 0.8402)
-        beta = trial.suggest_float("beta", 0.3071, 0.3079)
+        topK = trial.suggest_int("topK", 10, 500)
+        alpha = trial.suggest_float("alpha", 0.1, 0.9)
+        beta = trial.suggest_float("beta", 0.1, 0.9)
 
         for index in range(len(URM_train_list)):
 
@@ -60,8 +59,8 @@ if __name__ == '__main__':
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=10)
+    study = op.create_study(direction='maximize')
+    study.optimize(objective, n_trials=300)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

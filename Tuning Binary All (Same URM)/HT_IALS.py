@@ -24,8 +24,8 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_3K_BinURMTrain()
-    URM_validation_list = load_3K_BinURMValid()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -37,10 +37,10 @@ if __name__ == '__main__':
 
         recommender_IALS_list = []
 
-        factors = trial.suggest_int("factors", 50, 800)
+        factors = trial.suggest_int("factors", 200, 400)
         alpha = trial.suggest_int("alpha", 1, 50)
         iterations = trial.suggest_int("iterations", 10, 100)
-        regularization = trial.suggest_float("regularization", 1e-5, 1e-3)
+        regularization = trial.suggest_float("regularization", 1e-5, 1e-2)
 
         for index in range(len(URM_train_list)):
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=1)
+    study.optimize(objective, n_trials=100)
 
 
     # ---------------------------------------------------------------------------------------------------------
