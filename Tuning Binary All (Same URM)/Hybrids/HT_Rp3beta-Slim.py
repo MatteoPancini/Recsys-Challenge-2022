@@ -11,6 +11,7 @@ if __name__ == "__main__":
     from datetime import datetime
     import optuna as op
     import json
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Creating CSV header
@@ -29,8 +30,8 @@ if __name__ == "__main__":
     # Loading URMs
 
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_3K_BinURMTrain()
-    URM_validation_list = load_3K_BinURMValid()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -44,10 +45,10 @@ if __name__ == "__main__":
     for i in range(len(URM_train_list)):
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.8462944464325309, beta=0.3050885269698352, topK=78)
+        recommender_RP3beta_list[i].fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
-        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i], verbose=False))
-        recommender_Slim_list[i].fit(topK=241, alpha=0.0031642653228324906, l1_ratio=0.009828283497311959)
+        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
+        recommender_Slim_list[i].fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
 
     def objective(trial):
 
@@ -81,10 +82,10 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = RP3betaRecommender(URM_train_init)
-    rec1.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
+    rec1.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
-    rec2.fit(topK=241, alpha=0.0031642653228324906, l1_ratio=0.009828283497311959)
+    rec2.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)

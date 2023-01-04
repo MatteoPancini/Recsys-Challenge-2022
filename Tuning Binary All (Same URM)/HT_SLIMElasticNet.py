@@ -1,6 +1,6 @@
 if __name__ == "__main__":
 
-    from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, SLIMElasticNetRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Utils.recsys2022DataReader import *
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -40,10 +40,9 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_SlimElasticnet_list = []
-
-        topK = trial.suggest_int("topK", 240, 245)
-        alpha = trial.suggest_float("alpha", 0.00316, 0.0032)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.00981, 0.009829)
+        topK = trial.suggest_int("topK", 245, 255)
+        alpha = trial.suggest_float("alpha", 0.0030, 0.0035)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.0097, 0.0099)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(SLIMElasticNetRecommender(URM_train_list[index]))
@@ -61,7 +60,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
     study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=15)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     l1_ratio = study.best_params['l1_ratio']
 
-    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init, verbose=False)
+    recommender_SlimElasticNet = SLIMElasticNetRecommender(URM_train_init)
     recommender_SlimElasticNet.fit(alpha=alpha, l1_ratio=l1_ratio, topK=topK)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
