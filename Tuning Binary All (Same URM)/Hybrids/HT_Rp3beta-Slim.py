@@ -54,8 +54,8 @@ if __name__ == "__main__":
 
         recommender_hybrid_list = []
 
-        alpha = trial.suggest_float("alpha", 0.4, 0.5)
-        beta = trial.suggest_float("beta", 0.7, 0.8)
+        alpha = trial.suggest_float("alpha", 0.40, 0.41)
+        beta = trial.suggest_float("beta", 0.73, 0.74)
 
         for i in range(len(URM_train_list)):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_RP3beta_list[i], Recommender_2=recommender_Slim_list[i]))
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=300)
 
     # ---------------------------------------------------------------------------------------------------------
