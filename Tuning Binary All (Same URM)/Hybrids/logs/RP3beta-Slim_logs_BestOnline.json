@@ -4,7 +4,6 @@
 }{
     rec1 = RP3betaRecommender(URM_train_init)
     rec1.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
-
     rec2 = SLIMElasticNetRecommender(URM_train_init)
     rec2.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
 }[

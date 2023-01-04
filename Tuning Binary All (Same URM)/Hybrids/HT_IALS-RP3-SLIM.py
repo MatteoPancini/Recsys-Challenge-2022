@@ -2,6 +2,7 @@ if __name__ == "__main__":
 
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -29,8 +30,8 @@ if __name__ == "__main__":
     # Loading URMs
 
     URM_train_init = load_BinURMTrainInit()
-    URM_train_list = load_3K_BinURMTrain()
-    URM_validation_list = load_3K_BinURMValid()
+    URM_train_list = load_1K_BinURMTrain()
+    URM_validation_list = load_1K_BinURMValid()
     URM_test = load_BinURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
@@ -40,6 +41,7 @@ if __name__ == "__main__":
 
     recommender_IALS_list = []
     recommender_RP3beta_list = []
+    recommender_SLIM_List = []
 
     factors=110
     alpha=7
@@ -54,6 +56,11 @@ if __name__ == "__main__":
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[i], verbose=False))
         recommender_RP3beta_list[i].fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
 
+        recommender_SLIM_List.append(SLIMElasticNetRecommender(URM_train_list[i]))
+        recommender_SLIM_List[i].fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+
+    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_list[0], Recommender_1=recommender_RP3beta_list[0], Recommender_2=recommender_SLIM_List[0])
+    hybrid1.fit(alpha=0.40726736669265445, beta=0.7317482903276693)
 
     def objective(trial):
 
@@ -63,7 +70,7 @@ if __name__ == "__main__":
         beta = trial.suggest_float("beta", 0, 1)
 
         for i in range(len(URM_train_list)):
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_IALS_list[i], Recommender_2=recommender_RP3beta_list[i]))
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_IALS_list[i], Recommender_2=hybrid1))
             recommender_hybrid_list[i].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
@@ -78,7 +85,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=300)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -92,7 +99,14 @@ if __name__ == "__main__":
     rec2 = RP3betaRecommender(URM_train_init)
     rec2.fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
 
-    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
+    rec3 = SLIMElasticNetRecommender(URM_train_init)
+    rec3.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+
+    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_list[0], Recommender_1=rec2,
+                                                     Recommender_2=rec3)
+    hybrid1.fit(alpha=0.40726736669265445, beta=0.7317482903276693)
+
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=hybrid1)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
@@ -104,7 +118,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + "IALS-RP3beta" + "_logs_" + datetime.now().strftime(
+    with open("logs/" + "IALS-RP3beta-SLIM" + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
