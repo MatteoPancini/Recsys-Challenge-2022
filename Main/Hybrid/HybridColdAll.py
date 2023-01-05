@@ -1,19 +1,20 @@
 if __name__ == '__main__':
 
     from Utils.recsys2022DataReader import *
-    from Recommenders.Hybrid.HybridColdWithAll import HybridColdAllRecommender
-    from Utils.writeSubmission import write_submission
+    from Recommenders.Hybrid.HybridCold15WithAll import InteractionsHybridRecommender
+    from Evaluation.Evaluator import EvaluatorHoldout
+
 
     # Loading URM
-    URM = createURM()
-    ICM = createSmallICM()
+    URM_train = load_BinURMTrainInit()
+    URM_test = load_BinURMTest()
 
-    # Create the recommenders
+    recommender = InteractionsHybridRecommender(URM_train=URM_train)
+    recommender.fit()
 
-    recommender_Hybrid = HybridColdAllRecommender(URM_train=URM, ICM=ICM)
-    recommender_Hybrid.fit(alpha=0.4832181161074589)
+    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], verbose=False)
+    result_dict, _ = evaluator_test.evaluateRecommender(recommender)
 
-    # Write the submission file
-    write_submission(recommender=recommender_Hybrid,
-                     target_users_path="../../Input/data_target_users_test.csv",
-                     out_path='../../Output/{}_submission.csv'.format('Hybrid-Cold-All'))
+    print(result_dict)
+
+
