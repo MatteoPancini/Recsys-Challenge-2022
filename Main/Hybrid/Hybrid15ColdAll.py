@@ -1,7 +1,7 @@
 if __name__ == '__main__':
 
     from Utils.recsys2022DataReader import *
-    from Recommenders.Hybrid.HybridCold15WithAll import InteractionsHybridRecommender
+    from Recommenders.Hybrid.HybridCold15WithAll import HybridCold15WithAll
     from Evaluation.Evaluator import EvaluatorHoldout
     from Utils.writeSubmission import write_submission
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     print(result_dict)
     '''
     URM = createURMBinary()
-    recommender = InteractionsHybridRecommender(URM_train=URM)
+    recommender = HybridCold15WithAll(URM_train=URM)
     recommender.fit()
 
     # Write the submission file

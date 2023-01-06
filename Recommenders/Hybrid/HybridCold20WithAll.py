@@ -7,12 +7,12 @@ from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommend
 from tqdm import tqdm
 import numpy as np
 
-class HybridCold15WithAll(BaseRecommender):
+class HybridCold20WithAll(BaseRecommender):
 
-    RECOMMENDER_NAME = "HybridCold15WithAll"
+    RECOMMENDER_NAME = "HybridCold20WithAll"
 
     def __init__(self, URM_train):
-        super(HybridCold15WithAll, self).__init__(URM_train)
+        super(HybridCold20WithAll, self).__init__(URM_train)
 
     def fit(self):
 
@@ -20,14 +20,13 @@ class HybridCold15WithAll(BaseRecommender):
         # COLD
 
         recommender_rp3beta = RP3betaRecommender(URM_train=self.URM_train)
-        recommender_rp3beta.fit(alpha=0.8933157693622866, beta=0.14484583688745223, topK=344)
+        recommender_rp3beta.fit(alpha=0.7797119898657642, beta=0.294098959281335, topK=184)
 
         recommender_itemKNN = ItemKNNCFRecommender(URM_train=self.URM_train)
-        recommender_itemKNN.fit(topK=321, shrink=164)
+        recommender_itemKNN.fit(topK=356, shrink=115)
 
         self.recommender_cold = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=recommender_rp3beta, Recommender_2=recommender_itemKNN)
-        self.recommender_cold.fit(alpha=0.9196982707381445, beta=0.10860954592979288)
-
+        self.recommender_cold.fit(alpha=0.8282515157463998, beta=0.04381939765029954)
 
         # ------------------
         # ALL
@@ -53,19 +52,6 @@ class HybridCold15WithAll(BaseRecommender):
         self.recommender_all = LinearHybridTwoRecommenderTwoVariables(self.URM_train, Recommender_1=rec1, Recommender_2=hybrid1)
         self.recommender_all.fit(alpha=0.019318928403041356, beta=0.8537494424674974)
 
-        group_id = 0
-
-        interactions = []
-        for i in range(41629):
-            interactions.append(len(self.URM_train[i, :].nonzero()[0]))
-
-        list_group_interactions = [[0, 15], [21, 49], [50, max(interactions)]]
-
-        lower_bound = list_group_interactions[group_id][0]
-        higher_bound = list_group_interactions[group_id][1]
-
-        self.users_in_group = [user_id for user_id in range(len(interactions)) if (lower_bound <= interactions[user_id] <= higher_bound)]
-
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):
 
@@ -73,7 +59,9 @@ class HybridCold15WithAll(BaseRecommender):
 
         for i in tqdm(range(len(user_id_array))):
 
-            if i in self.users_in_group:
+            interactions = len(self.URM_train[user_id_array[i], :].indices)
+
+            if interactions <= 20:
                 items_weights1 = self.recommender_cold._compute_item_score(user_id_array, items_to_compute)
             else:
                 items_weights1 = self.recommender_all._compute_item_score(user_id_array, items_to_compute)
