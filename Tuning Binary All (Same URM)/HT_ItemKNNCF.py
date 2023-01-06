@@ -11,19 +11,6 @@ if __name__ == '__main__':
     from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
-    # Creating CSV header
-
-    header = ['recommender', 'shrink', 'topk', 'similarity', 'feature_weighting', 'MAP']
-
-    partialsFile = 'ItemKNNCF_' + datetime.now().strftime('%b%d_%H-%M-%S')
-
-    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
-        writer = csv.writer(f)
-
-        # write the header
-        writer.writerow(header)
-
-    # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
 
     URM_train_init = load_BinURMTrainInit()
@@ -39,8 +26,8 @@ if __name__ == '__main__':
 
         recommender_ItemKNNCF_list = []
 
-        topK = trial.suggest_int("topK", 100, 2000)
-        shrink = trial.suggest_int("shrink", 10, 1000)
+        topK = trial.suggest_int("topK", 10, 500)
+        shrink = trial.suggest_int("shrink", 300, 1000)
         similarity = trial.suggest_categorical("similarity", ["cosine"])
         feature_weighting = trial.suggest_categorical("feature_weighting", ["TF-IDF"])
 
@@ -50,17 +37,11 @@ if __name__ == '__main__':
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_ItemKNNCF_list)
 
-        resultsToPrint = [recommender_ItemKNNCF_list[0].RECOMMENDER_NAME, shrink, topK, similarity, feature_weighting,  sum(MAP_result) / len(MAP_result)]
-
-        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(resultsToPrint)
-
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
-    study.optimize(objective, n_trials=100)
+    study = op.create_study(direction='maximize')
+    study.optimize(objective, n_trials=500)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

@@ -1,9 +1,9 @@
 if __name__ == '__main__':
 
+    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     from Utils.recsys2022DataReader import createURMBinary
     from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Utils.writeSubmission import write_submission
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
                                                                 Recommender_2=rec2)
     hybrid1.fit(alpha=0.4133522121773261, beta=0.7451419993321209)
 
-    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM, Recommender_1=rec1, Recommender_2=hybrid1)
+    recommender_Hybrid = LinearHybridTwoRecommenderTwoVariables(URM, Recommender_1=rec3, Recommender_2=hybrid1)
     recommender_Hybrid.fit(alpha=0.019318928403041356, beta=0.8537494424674974)
 
 

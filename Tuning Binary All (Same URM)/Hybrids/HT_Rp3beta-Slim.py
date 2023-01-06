@@ -45,17 +45,17 @@ if __name__ == "__main__":
     for i in range(len(URM_train_list)):
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
+        recommender_RP3beta_list[i].fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
+
 
         recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+        recommender_Slim_list[i].fit(topK=315, alpha=0.0029908408773215342, l1_ratio=0.008298990903734742)
 
     def objective(trial):
 
         recommender_hybrid_list = []
-
-        alpha = trial.suggest_float("alpha", 0.40, 0.41)
-        beta = trial.suggest_float("beta", 0.73, 0.74)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
 
         for i in range(len(URM_train_list)):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_RP3beta_list[i], Recommender_2=recommender_Slim_list[i]))
@@ -82,10 +82,10 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = RP3betaRecommender(URM_train_init)
-    rec1.fit(alpha=0.8401946814961014, beta=0.3073181471251768, topK=77)
+    rec1.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
-    rec2.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+    rec2.fit(topK=315, alpha=0.0029908408773215342, l1_ratio=0.008298990903734742)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)

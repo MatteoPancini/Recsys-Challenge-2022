@@ -12,19 +12,7 @@ if __name__ == "__main__":
     from datetime import datetime
     import optuna as op
     import json
-
-    # ---------------------------------------------------------------------------------------------------------
-    # Creating CSV header
-
-    header = ['recommender', 'alpha', 'beta', 'MAP']
-
-    partialsFile = 'IALS-RP3beta' + datetime.now().strftime('%b%d_%H-%M-%S')
-
-    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
-        writer = csv.writer(f)
-
-        # write the header
-        writer.writerow(header)
+    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
@@ -43,15 +31,10 @@ if __name__ == "__main__":
     recommender_RP3beta_list = []
     recommender_SLIM_List = []
 
-    factors=110
-    alpha=7
-    iterations=57
-    regularization=0.0008866558623568822
-
     for i in range(len(URM_train_list)):
 
         recommender_IALS_list.append(ImplicitALSRecommender(URM_train=URM_train_list[i]))
-        recommender_IALS_list[i].fit(factors=factors, alpha=alpha, iterations=iterations, regularization=regularization)
+        recommender_IALS_list[i].fit(factors=110, alpha=7, iterations=57, regularization=0.0008866558623568822)
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[i], verbose=False))
         recommender_RP3beta_list[i].fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
@@ -66,8 +49,8 @@ if __name__ == "__main__":
 
         recommender_hybrid_list = []
 
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 1)
+        alpha = trial.suggest_float("alpha", 0, 0.1)
+        beta = trial.suggest_float("beta", 0.8, 0.9)
 
         for i in range(len(URM_train_list)):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_IALS_list[i], Recommender_2=hybrid1))
@@ -75,17 +58,11 @@ if __name__ == "__main__":
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
 
-        resultsToPrint = ["IALS-RP3beta", alpha, beta, sum(MAP_result) / len(MAP_result)]
-
-        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(resultsToPrint)
-
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=300)
+    study.optimize(objective, n_trials=500)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -94,7 +71,7 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = ImplicitALSRecommender(URM_train_init)
-    rec1.fit(factors=factors, alpha=alpha, iterations=iterations, regularization=regularization)
+    rec1.fit(factors=110, alpha=7, iterations=57, regularization=0.0008866558623568822)
 
     rec2 = RP3betaRecommender(URM_train_init)
     rec2.fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
@@ -102,7 +79,7 @@ if __name__ == "__main__":
     rec3 = SLIMElasticNetRecommender(URM_train_init)
     rec3.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
 
-    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_list[0], Recommender_1=rec2,
+    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec2,
                                                      Recommender_2=rec3)
     hybrid1.fit(alpha=0.40726736669265445, beta=0.7317482903276693)
 
