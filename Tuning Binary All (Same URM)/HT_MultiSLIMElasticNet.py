@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 240, 255)
-        alpha = trial.suggest_float("alpha", 0.003, 0.0035)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.0092, 0.0098)
+        topK = trial.suggest_int("topK", 250, 450)
+        alpha = trial.suggest_float("alpha", 0.0025, 0.0035)
+        l1_ratio = trial.suggest_float("l1_ratio", 0.008, 0.009)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=30)
+    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study.optimize(objective, n_trials=15)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -74,9 +74,6 @@ if __name__ == "__main__":
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_SlimElasticNet)
-
-    recommender_SlimElasticNet.save_model('../Models/', recommender_SlimElasticNet.RECOMMENDER_NAME + datetime.now().strftime(
-        '%b%d_%H-%M-%S'))
 
     # ---------------------------------------------------------------------------------------------------------
     # Writing hyperparameter into a log

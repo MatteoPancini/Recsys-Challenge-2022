@@ -3,8 +3,9 @@ if __name__ == '__main__':
     from Utils.recsys2022DataReader import *
     from Recommenders.Hybrid.HybridCold15WithAll import InteractionsHybridRecommender
     from Evaluation.Evaluator import EvaluatorHoldout
+    from Utils.writeSubmission import write_submission
 
-
+    '''
     # Loading URM
     URM_train = load_BinURMTrainInit()
     URM_test = load_BinURMTest()
@@ -16,5 +17,16 @@ if __name__ == '__main__':
     result_dict, _ = evaluator_test.evaluateRecommender(recommender)
 
     print(result_dict)
+    '''
+    URM = createURMBinary()
+    recommender = InteractionsHybridRecommender(URM_train=URM)
+    recommender.fit()
+
+    # Write the submission file
+    write_submission(recommender=recommender,
+                     target_users_path="../../Input/data_target_users_test.csv",
+                     out_path='../../Output/{}2712_submission.csv'.format('Hybrid15All'))
+
+
 
 
