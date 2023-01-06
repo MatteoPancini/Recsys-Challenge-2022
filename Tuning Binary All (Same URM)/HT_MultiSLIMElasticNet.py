@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
         recommender_SlimElasticnet_list = []
 
-        topK = trial.suggest_int("topK", 250, 450)
-        alpha = trial.suggest_float("alpha", 0.0025, 0.0035)
-        l1_ratio = trial.suggest_float("l1_ratio", 0.008, 0.009)
+        topK = trial.suggest_int("topK", 150, 300)
+        alpha = trial.suggest_float("alpha", 1e-5, 1e-3)
+        l1_ratio = trial.suggest_float("l1_ratio", 1e-5, 1e-3)
 
         for index in range(len(URM_train_list)):
             recommender_SlimElasticnet_list.append(MultiThreadSLIM_SLIMElasticNetRecommender(URM_train_list[index]))
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         return sum(MAP_result) / len(MAP_result)
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=15)
 
     # ---------------------------------------------------------------------------------------------------------
