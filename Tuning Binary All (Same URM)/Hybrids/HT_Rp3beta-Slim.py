@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
 
         recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].fit(topK=315, alpha=0.0029908408773215342, l1_ratio=0.008298990903734742)
+        recommender_Slim_list[i].fit(topK=396, alpha=0.0026732398099801086, l1_ratio=0.00859835955640564)
 
     def objective(trial):
 
@@ -85,7 +85,8 @@ if __name__ == "__main__":
     rec1.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
     rec2 = SLIMElasticNetRecommender(URM_train_init)
-    rec2.fit(topK=315, alpha=0.0029908408773215342, l1_ratio=0.008298990903734742)
+    rec2.fit(topK=396, alpha=0.0026732398099801086, l1_ratio=0.00859835955640564)
+
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)

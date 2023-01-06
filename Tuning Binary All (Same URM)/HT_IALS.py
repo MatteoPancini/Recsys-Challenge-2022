@@ -37,10 +37,10 @@ if __name__ == '__main__':
 
         recommender_IALS_list = []
 
-        factors = trial.suggest_int("factors", 200, 400)
-        alpha = trial.suggest_int("alpha", 1, 50)
+        factors = trial.suggest_int("factors", 50, 100)
+        alpha = trial.suggest_int("alpha", 7, 7)
         iterations = trial.suggest_int("iterations", 10, 100)
-        regularization = trial.suggest_float("regularization", 1e-5, 1e-2)
+        regularization = trial.suggest_float("regularization", 0.0008866558623568822, 0.0008866558623568822)
 
         for index in range(len(URM_train_list)):
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=50)
 
 
     # ---------------------------------------------------------------------------------------------------------
