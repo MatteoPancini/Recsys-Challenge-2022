@@ -5,21 +5,7 @@ if __name__ == '__main__':
     import json
     import optuna as op
     from datetime import datetime
-    import csv
     from Utils.recsys2022DataReader import *
-
-    # ---------------------------------------------------------------------------------------------------------
-    # Creating CSV header
-
-    header = ['recommender', 'factors', 'alpha', 'regularization', 'iterations', 'MAP']
-
-    partialsFile = 'IALS_' + datetime.now().strftime('%b%d_%H-%M-%S')
-
-    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
-        writer = csv.writer(f)
-
-        # write the header
-        writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
@@ -37,10 +23,10 @@ if __name__ == '__main__':
 
         recommender_IALS_list = []
 
-        factors = trial.suggest_int("factors", 50, 100)
-        alpha = trial.suggest_int("alpha", 7, 7)
+        factors = trial.suggest_int("factors", 100, 250)
+        alpha = trial.suggest_int("alpha", 1, 20)
         iterations = trial.suggest_int("iterations", 10, 100)
-        regularization = trial.suggest_float("regularization", 0.0008866558623568822, 0.0008866558623568822)
+        regularization = trial.suggest_float("regularization", 0.00001, 0.01)
 
         for index in range(len(URM_train_list)):
 
@@ -50,18 +36,11 @@ if __name__ == '__main__':
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_IALS_list)
 
-        resultsToPrint = [recommender_IALS_list[0].RECOMMENDER_NAME, factors, alpha, regularization,
-                          iterations, sum(MAP_result) / len(MAP_result)]
-
-        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(resultsToPrint)
-
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=200)
 
 
     # ---------------------------------------------------------------------------------------------------------

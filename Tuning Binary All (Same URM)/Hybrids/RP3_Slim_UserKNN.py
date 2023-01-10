@@ -1,6 +1,6 @@
 if __name__ == "__main__":
 
-    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
+    from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
@@ -8,7 +8,6 @@ if __name__ == "__main__":
     from Evaluation.Evaluator import EvaluatorHoldout
     from Utils.recsys2022DataReader import *
     import numpy as np
-    import csv
     from datetime import datetime
     import optuna as op
     import json
@@ -27,14 +26,14 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
-    recommender_IALS_list = []
+    recommender_UserKNN_list = []
     recommender_RP3beta_list = []
     recommender_SLIM_List = []
 
     for i in range(len(URM_train_list)):
 
-        recommender_IALS_list.append(ImplicitALSRecommender(URM_train=URM_train_list[i]))
-        recommender_IALS_list[i].fit(factors=110, alpha=7, iterations=57, regularization=0.0008866558623568822)
+        recommender_UserKNN_list.append(UserKNNCFRecommender(URM_train=URM_train_list[i]))
+        recommender_UserKNN_list[i].fit(topK=500, shrink=10)
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train_list[i], verbose=False))
         recommender_RP3beta_list[i].fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
@@ -50,10 +49,10 @@ if __name__ == "__main__":
         recommender_hybrid_list = []
 
         alpha = trial.suggest_float("alpha", 0, 0.1)
-        beta = trial.suggest_float("beta", 0.6, 0.9)
+        beta = trial.suggest_float("beta", 0.7, 1)
 
         for i in range(len(URM_train_list)):
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_IALS_list[i], Recommender_2=hybrid1))
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_UserKNN_list[i], Recommender_2=hybrid1))
             recommender_hybrid_list[i].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
@@ -62,7 +61,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=500)
+    study.optimize(objective, n_trials=250)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -70,8 +69,8 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
 
-    rec1 = ImplicitALSRecommender(URM_train_init)
-    rec1.fit(factors=110, alpha=7, iterations=57, regularization=0.0008866558623568822)
+    rec1 = UserKNNCFRecommender(URM_train_init)
+    rec1.fit(topK=500, shrink=10)
 
     rec2 = RP3betaRecommender(URM_train_init)
     rec2.fit(topK=77, alpha=0.8401946814961014, beta=0.3073181471251768)
@@ -79,8 +78,7 @@ if __name__ == "__main__":
     rec3 = SLIMElasticNetRecommender(URM_train_init)
     rec3.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
 
-    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec2,
-                                                     Recommender_2=rec3)
+    hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec2, Recommender_2=rec3)
     hybrid1.fit(alpha=0.40726736669265445, beta=0.7317482903276693)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=hybrid1)

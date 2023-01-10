@@ -25,8 +25,14 @@ class HybridCold15WithAll(BaseRecommender):
         recommender_itemKNN = ItemKNNCFRecommender(URM_train=self.URM_train)
         recommender_itemKNN.fit(topK=321, shrink=164)
 
-        self.recommender_cold = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=recommender_rp3beta, Recommender_2=recommender_itemKNN)
-        self.recommender_cold.fit(alpha=0.9196982707381445, beta=0.10860954592979288)
+        recommender_hybrid1 = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=recommender_rp3beta, Recommender_2=recommender_itemKNN)
+        recommender_hybrid1.fit(alpha=0.9196982707381445, beta=0.10860954592979288)
+
+        recommender_slim = SLIMElasticNetRecommender(URM_train=self.URM_train)
+        recommender_slim.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+
+        self.recommender_cold = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=recommender_hybrid1, Recommender_2=recommender_slim)
+        self.recommender_cold.fit(alpha=0.8277945119987244, beta=0.10555203819177661)
 
 
         # ------------------
