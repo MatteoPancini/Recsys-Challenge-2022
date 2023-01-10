@@ -10,14 +10,14 @@ urmPath = "../Input/interactions_and_impressions.csv"
 icmTypePath = "../../Input/data_ICM_type.csv"
 icmLenghtPath = "../../Input/data_ICM_length.csv"
 '''
-urmPath = "../../Input/interactions_and_impressions.csv"
-icmTypePath = "../../Input/data_ICM_type.csv"
-icmLenghtPath = "../../Input/data_ICM_length.csv"
+urmPath = "../Input/interactions_and_impressions.csv"
+icmTypePath = "../Input/data_ICM_type.csv"
+icmLenghtPath = "../Input/data_ICM_length.csv"
 
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 sourceDataset = '../../Dataset/Our/'
-binsourceDataset ='../Dataset/'
+binsourceDataset ='../../Dataset/'
 
 def createURM():
     dataset = pd.read_csv(urmPath)
@@ -172,6 +172,26 @@ def createSmallICM():
         ICM[itemsID[x]][1] = lenghtArray[x]"""
 
     ICM = sp.csr_matrix(ICM)
+
+    return ICM
+
+def createICMtypes():
+
+
+    types = pd.read_csv(icmTypePath)
+    types = types.drop(columns=['data'], axis=1)
+    types = types.rename(columns={'feature_id': 'type'})
+
+    for i in range(23091):
+        types['type'][i] /= 7
+
+    typesFiltered = types[types['item_id'] <= 24506]
+    itemsID = typesFiltered['item_id'].to_numpy()
+    typesArray = typesFiltered['type'].to_numpy()
+    ICM = np.zeros((24507, 1), dtype=float)
+
+    for x in range(len(itemsID)):
+        ICM[itemsID[x]][0] = typesArray[x]
 
     return ICM
 
