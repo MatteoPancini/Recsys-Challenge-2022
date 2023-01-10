@@ -10,14 +10,14 @@ urmPath = "../Input/interactions_and_impressions.csv"
 icmTypePath = "../../Input/data_ICM_type.csv"
 icmLenghtPath = "../../Input/data_ICM_length.csv"
 '''
-urmPath = "../../Input/interactions_and_impressions.csv"
+urmPath = "../Input/interactions_and_impressions.csv"
 icmTypePath = "../Input/data_ICM_type.csv"
 icmLenghtPath = "../Input/data_ICM_length.csv"
 
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
 sourceDataset = '../../Dataset/Our/'
-binsourceDataset = "../Dataset/"
+binsourceDataset ='../../Dataset/'
 
 def createURM():
     dataset = pd.read_csv(urmPath)
@@ -70,7 +70,8 @@ def createURMBinary():
     URM = sp.csr_matrix(URM)
     return URM
 
-def createBigURMBinary():
+def createURMWithNegative():
+
     dataset = pd.read_csv(urmPath)
 
     dataset = dataset.drop(columns=['Impressions'])
@@ -79,14 +80,37 @@ def createBigURMBinary():
     userIDS = dataset['UserID'].unique()
     itemIDS = dataset['ItemID'].unique()
 
-    URM = np.zeros((len(userIDS), 27968), dtype=int)
+    URM = np.zeros((len(userIDS), len(itemIDS)), dtype=int)
+    ones_list = np.zeros((len(userIDS), len(itemIDS)), dtype=int)
+    negative_users = np.zeros((len(userIDS), 2), dtype=int)
+
     for x in range(len(datasetCOO.data)):
-        if (datasetCOO.data[x] == 0 or datasetCOO.data[x] == 1) and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 1:
-            URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(1)
+        if datasetCOO.data[x] == 0:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] <= 4:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(5)
+                if negative_users[datasetCOO.row[x]][0] == 1 and negative_users[datasetCOO.row[x]][1] == datasetCOO.col[
+                    x]:
+                    negative_users[datasetCOO.row[x]][0] = 0
+            else:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(7)
+        elif datasetCOO.data[x] == 1:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 7:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = int(5)
+            elif negative_users[datasetCOO.row[x]][0] == 0:
+                negative_users[datasetCOO.row[x]][0] = 1
+                negative_users[datasetCOO.row[x]][1] = datasetCOO.col[x]
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = -1
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 2
+                ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] >= 2 and ones_list[datasetCOO.row[x]][datasetCOO.col[x]] < 3:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+                ones_list[datasetCOO.row[x]][datasetCOO.col[x]] += 1
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] > 1 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 5 and URM[datasetCOO.row[x]][datasetCOO.col[x]] != 7 and ones_list[datasetCOO.row[x]][datasetCOO.col[x]] >= 3:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = URM[datasetCOO.row[x]][datasetCOO.col[x]] - 1
 
     URM = sp.csr_matrix(URM)
     return URM
-
 def createBigURM():
     dataset = pd.read_csv(urmPath)
 
@@ -148,6 +172,26 @@ def createSmallICM():
         ICM[itemsID[x]][1] = lenghtArray[x]"""
 
     ICM = sp.csr_matrix(ICM)
+
+    return ICM
+
+def createICMtypes():
+
+
+    types = pd.read_csv(icmTypePath)
+    types = types.drop(columns=['data'], axis=1)
+    types = types.rename(columns={'feature_id': 'type'})
+
+    for i in range(23091):
+        types['type'][i] /= 7
+
+    typesFiltered = types[types['item_id'] <= 24506]
+    itemsID = typesFiltered['item_id'].to_numpy()
+    typesArray = typesFiltered['type'].to_numpy()
+    ICM = np.zeros((24507, 1), dtype=float)
+
+    for x in range(len(itemsID)):
+        ICM[itemsID[x]][0] = typesArray[x]
 
     return ICM
 
