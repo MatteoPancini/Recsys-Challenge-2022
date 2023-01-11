@@ -15,20 +15,11 @@ if __name__ == "__main__":
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
-    URM = createSlimURM()
 
-    # ---------------------------------------------------------------------------------------------------------
-    # K-Fold Cross Validation + Preparing training, validation, test split and evaluator
-
-    URM_train_init, URM_test = split_train_in_two_percentage_global_sample(URM, train_percentage=0.85)
-
-    URM_train_list = []
-    URM_validation_list = []
-
-    for k in range(1):
-        URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_init, train_percentage=0.85)
-        URM_train_list.append(URM_train)
-        URM_validation_list.append(URM_validation)
+    URM_train_init = load_FinalURMTrainInit()
+    URM_train_list = load_1K_FinalURMTrain()
+    URM_validation_list = load_1K_FinalURMValid()
+    URM_test = load_FinalURMTest()
 
     evaluator_validation = K_Fold_Evaluator_MAP(URM_validation_list, cutoff_list=[10], verbose=False)
 
@@ -38,9 +29,9 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_SlimElasticnet_list = []
-        topK = trial.suggest_int("topK", 150, 550)
-        alpha = trial.suggest_float("alpha", 1e-5, 1e-2)
-        l1_ratio = trial.suggest_float("l1_ratio", 1e-5, 1e-2)
+        topK = trial.suggest_int("topK", 500, 4000)
+        alpha = trial.suggest_float("alpha", 1e-5, 1e-1)
+        l1_ratio = trial.suggest_float("l1_ratio", 1e-5, 1e-1)
 
 
         for index in range(len(URM_train_list)):
@@ -74,7 +65,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + recommender_SlimElasticNet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
+    with open("logs/Both" + recommender_SlimElasticNet.RECOMMENDER_NAME + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
