@@ -57,7 +57,9 @@ if __name__ == "__main__":
         beta = trial.suggest_float("beta", 0, 1)
 
         for i in range(len(URM_train_list)):
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i], Recommender_1=recommender_RP3beta_list[i], Recommender_2=recommender_Slim_list[i]))
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
+                                                                                  Recommender_1=recommender_RP3beta_list[i],
+                                                                                  Recommender_2=recommender_Slim_list[i]))
             recommender_hybrid_list[i].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
