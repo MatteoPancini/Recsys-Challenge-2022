@@ -23,8 +23,8 @@ if __name__ == '__main__':
 
         recommender_IALS_list = []
 
-        factors = trial.suggest_int("factors", 100, 250)
-        alpha = trial.suggest_int("alpha", 1, 20)
+        factors = trial.suggest_int("factors", 50, 200)
+        alpha = trial.suggest_int("alpha", 1, 10)
         iterations = trial.suggest_int("iterations", 10, 100)
         regularization = trial.suggest_float("regularization", 0.00001, 0.01)
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=100)
 
 
     # ---------------------------------------------------------------------------------------------------------
