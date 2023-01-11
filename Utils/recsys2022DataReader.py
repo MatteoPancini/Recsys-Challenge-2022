@@ -53,6 +53,49 @@ def createURM():
     URM = sp.csr_matrix(URM)
     return URM
 
+
+def createSlimURM():
+    dataset = pd.read_csv(urmPath)
+
+    dataset = dataset.drop(columns=['Impressions'])
+
+    datasetCOO = sp.coo_matrix((dataset["Data"].values, (dataset["UserID"].values, dataset["ItemID"].values)))
+    userIDS = dataset['UserID'].unique()
+    itemIDS = dataset['ItemID'].unique()
+
+    URM = np.zeros((len(userIDS), len(itemIDS)), dtype=float)
+
+    for x in range(len(datasetCOO.data)):
+        if datasetCOO.data[x] == 0:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] != 1.0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.25
+        elif datasetCOO.data[x] == 1:
+            URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.0
+
+    URM = sp.csr_matrix(URM)
+    return URM
+
+def createRP3betaURM():
+    dataset = pd.read_csv(urmPath)
+
+    dataset = dataset.drop(columns=['Impressions'])
+
+    datasetCOO = sp.coo_matrix((dataset["Data"].values, (dataset["UserID"].values, dataset["ItemID"].values)))
+    userIDS = dataset['UserID'].unique()
+    itemIDS = dataset['ItemID'].unique()
+
+    URM = np.zeros((len(userIDS), len(itemIDS)), dtype=float)
+
+    for x in range(len(datasetCOO.data)):
+        if datasetCOO.data[x] == 0:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] != 1.0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 2.0
+        elif datasetCOO.data[x] == 1:
+            URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.0
+
+    URM = sp.csr_matrix(URM)
+    return URM
+
 def createURMBinary():
     dataset = pd.read_csv(urmPath)
 
