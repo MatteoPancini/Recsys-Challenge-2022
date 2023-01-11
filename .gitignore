@@ -16,7 +16,7 @@ Data_manager_offline_datasets/**
 
 **/.pytest_cache/*
 
-Tuning Binary All (Same URM)/result_experiments
+Old Tuning/Tuning Binary All (Same URM)/result_experiments
 
 
 # Ignore cython compiled files
