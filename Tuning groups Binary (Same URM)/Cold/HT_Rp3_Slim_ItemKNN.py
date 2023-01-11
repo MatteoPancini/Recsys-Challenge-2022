@@ -1,6 +1,7 @@
 if __name__ == "__main__":
     from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -11,19 +12,6 @@ if __name__ == "__main__":
     import optuna as op
     import json
     from optuna.samplers import RandomSampler
-
-    # ---------------------------------------------------------------------------------------------------------
-    # Creating CSV header
-
-    header = ['recommender', 'alpha', 'beta', 'TopK', 'MAP']
-
-    partialsFile = 'RP3beta_ItemKNNCF' + datetime.now().strftime('%b%d_%H-%M-%S')
-
-    with open('partials/' + partialsFile + '.csv', 'w', encoding='UTF8') as f:
-        writer = csv.writer(f)
-
-        # write the header
-        writer.writerow(header)
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
@@ -83,6 +71,8 @@ if __name__ == "__main__":
 
     recommender_RP3beta_list = []
     recommender_ItemKNN_list = []
+    recommender_Slim_list = []
+    recommender_hybrid1_list = []
     MAP_results_list = []
 
     for index in range(len(URM_train_list)):
@@ -93,27 +83,25 @@ if __name__ == "__main__":
         recommender_ItemKNN_list.append(ItemKNNCFRecommender(URM_train_list[index], verbose=False))
         recommender_ItemKNN_list[index].fit(topK=321, shrink=164)
 
+        recommender_hybrid1_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
+        recommender_hybrid1_list[index].fit(alpha=0.9196982707381445, beta=0.10860954592979288)
+
+        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[index], verbose=False))
+        recommender_Slim_list[index].fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+
     def objective(trial):
 
         recommender_hybrid_list = []
 
-        alpha = trial.suggest_float("alpha", 0.6, 1)
-        beta = trial.suggest_float("beta", 0, 0.3)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
 
         for index in range(len(URM_train_list)):
 
-            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_RP3beta_list[index], Recommender_2=recommender_ItemKNN_list[index]))
+            recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[index], Recommender_1=recommender_hybrid1_list[index], Recommender_2=recommender_Slim_list[index]))
             recommender_hybrid_list[index].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
-        MAP_results_list.append(MAP_result)
-
-        resultsToPrint = ["RP3beta_ItemKNNCF", alpha, beta, sum(MAP_result) / len(MAP_result)]
-
-        with open('partials/' + partialsFile + '.csv', 'a+', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(resultsToPrint)
-
         return sum(MAP_result) / len(MAP_result)
 
 
@@ -132,7 +120,13 @@ if __name__ == "__main__":
     recommender_ItemKNN = ItemKNNCFRecommender(URM_train_init, verbose=False)
     recommender_ItemKNN.fit(topK=321, shrink=164)
 
-    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
+    rec1 = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=recommender_RP3beta, Recommender_2=recommender_ItemKNN)
+    rec1.fit(alpha=0.9196982707381445, beta=0.10860954592979288)
+
+    recommender_Slim = SLIMElasticNetRecommender(URM_train_init)
+    recommender_Slim.fit(topK=250, alpha=0.00312082198837027, l1_ratio=0.009899185175306373)
+
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=recommender_Slim)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], ignore_users=users_not_in_group)

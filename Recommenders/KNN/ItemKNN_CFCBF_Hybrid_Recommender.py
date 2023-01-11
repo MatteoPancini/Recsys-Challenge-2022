@@ -11,7 +11,6 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 import scipy.sparse as sps
 import numpy as np
 
-
 class ItemKNN_CFCBF_Hybrid_Recommender(ItemKNNCBFRecommender):
     """ ItemKNN_CFCBF_Hybrid_Recommender"""
 

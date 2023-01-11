@@ -46,7 +46,7 @@ if __name__ == "__main__":
     for i in range(41629):
         interactions.append(len(URM_train_init[i, :].nonzero()[0]))
 
-    list_group_interactions = [[0, 10], [21, 49], [50, max(interactions)]]
+    list_group_interactions = [[0, 15], [21, 49], [50, max(interactions)]]
 
     lower_bound = list_group_interactions[group_id][0]
     higher_bound = list_group_interactions[group_id][1]

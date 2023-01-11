@@ -5,6 +5,7 @@ if __name__ == "__main__":
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
     from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
+    from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
     from Utils.recsys2022DataReader import *
@@ -44,22 +45,29 @@ if __name__ == "__main__":
 
     hybrid2_train = LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=IALS_train, Recommender_2=hybrid1_train)
     hybrid2_train.fit(alpha=0.019318928403041356, beta=0.8537494424674974)
+
+    hybrid3_train = LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=hybrid2_train, Recommender_2=ItemKNN_train)
+    hybrid3_train.fit(alpha=0.5182132379810547, beta=4.19321787406275e-06)
+
+    UserKNN_train = UserKNNCFRecommender(URM_train)
+    UserKNN_train.fit(topK=500, shrink=10)
+
+
     def objective(trial):
 
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 0.01)
+        alpha = trial.suggest_float("alpha", 0.5, 1)
+        beta = trial.suggest_float("beta", 0, 0.1)
         recommender_hybrid = []
 
-        recommender_hybrid.append(LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=hybrid2_train, Recommender_2=ItemKNN_train))
+        recommender_hybrid.append(LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=hybrid3_train, Recommender_2=UserKNN_train))
         recommender_hybrid[0].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid)
 
-
         return sum(MAP_result) / len(MAP_result)
 
 
-    study = op.create_study(direction='maximize', sampler=RandomSampler())
+    study = op.create_study(direction='maximize')
     study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
@@ -87,7 +95,13 @@ if __name__ == "__main__":
     hybrid2_init = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=IALS_init, Recommender_2=hybrid1_init)
     hybrid2_init.fit(alpha=0.019318928403041356, beta=0.8537494424674974)
 
-    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=hybrid2_init, Recommender_2=ItemKNN_init)
+    hybrid3_init = LinearHybridTwoRecommenderTwoVariables(URM_train, Recommender_1=hybrid2_init, Recommender_2=ItemKNN_init)
+    hybrid3_init.fit(alpha=0.5182132379810547, beta=4.19321787406275e-06)
+
+    UserKNN_init = UserKNNCFRecommender(URM_train_init)
+    UserKNN_init.fit(topK=500, shrink=10)
+
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=hybrid3_init, Recommender_2=UserKNN_init)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10])
