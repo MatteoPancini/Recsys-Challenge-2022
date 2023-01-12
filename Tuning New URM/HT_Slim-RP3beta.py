@@ -10,7 +10,6 @@ if __name__ == "__main__":
     from datetime import datetime
     import optuna as op
     import json
-    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
@@ -31,16 +30,16 @@ if __name__ == "__main__":
     for i in range(1):
 
         recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].fit(topK=3890, alpha=0.0029228929900398564, l1_ratio=0.009916947930369228)
+        recommender_Slim_list[i].fit(topK=3310, alpha=0.0014579129528836648, l1_ratio=0.04059573169766696)
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.6464070203480127, beta=0.23862952875217264, topK=67)
+        recommender_RP3beta_list[i].fit(alpha=0.5530367465098776, beta=0.34358420831740083, topK=70)
 
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 1)
+        alpha = trial.suggest_float("alpha", 0.5, 1)
+        beta = trial.suggest_float("beta", 0, 0.5)
 
         for i in range(1):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
