@@ -33,7 +33,7 @@ if __name__ == "__main__":
         recommender_Slim_list[i].fit(topK=3310, alpha=0.0014579129528836648, l1_ratio=0.04059573169766696)
 
         recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.5530367465098776, beta=0.34358420831740083, topK=70)
+        recommender_RP3beta_list[i].fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
     def objective(trial):
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     beta = study.best_params['beta']
 
     rec1 = SLIMElasticNetRecommender(URM_train_init)
-    rec1.fit(topK=3890, alpha=0.0029228929900398564, l1_ratio=0.009916947930369228)
+    rec1.fit(topK=3310, alpha=0.0014579129528836648, l1_ratio=0.04059573169766696)
 
     rec2 = RP3betaRecommender(URM_train_init)
     rec2.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
