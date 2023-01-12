@@ -4,10 +4,8 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
     from Utils.recsys2022DataReader import *
-    from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     import optuna as op
-    from Data_manager.split_functions.split_train_validation_random_holdout import \
-        split_train_in_two_percentage_global_sample
     import json
 
     # ---------------------------------------------------------------------------------------------------------
@@ -25,35 +23,37 @@ if __name__ == '__main__':
 
     def objective(trial):
 
-        recommender_RpP3beta_list = []
+        recommender_IALS_list = []
 
-        topK = trial.suggest_int("topK", 10, 1000)
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
-        beta = trial.suggest_float("beta", 0.1, 0.9)
+        factors = trial.suggest_int("factors", 50, 200)
+        alpha = trial.suggest_int("alpha", 1, 10)
+        iterations = trial.suggest_int("iterations", 10, 100)
+        regularization = trial.suggest_float("regularization", 0.00001, 0.01)
 
         for index in range(len(URM_train_list)):
 
-            recommender_RpP3beta_list.append(RP3betaRecommender(URM_train_list[index]))
-            recommender_RpP3beta_list[index].fit(alpha=alpha, beta=beta, topK=topK)
+            recommender_IALS_list.append(ImplicitALSRecommender(URM_train_list[index]))
+            recommender_IALS_list[index].fit(alpha=alpha, factors=factors, regularization=regularization, iterations=iterations)
 
 
-        MAP_result = evaluator_validation.evaluateRecommender(recommender_RpP3beta_list)
+        MAP_result = evaluator_validation.evaluateRecommender(recommender_IALS_list)
 
         return sum(MAP_result) / len(MAP_result)
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=250)
+    study.optimize(objective, n_trials=200)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
-    topK = study.best_params['topK']
+    factors = study.best_params['factors']
     alpha = study.best_params['alpha']
-    beta = study.best_params['beta']
+    regularization = study.best_params['regularization']
+    iterations = study.best_params['iterations']
 
-    recommender_RP3beta = RP3betaRecommender(URM_train_init)
-    recommender_RP3beta.fit(alpha=alpha, beta=beta, topK=topK)
+    recommender_RP3beta = ImplicitALSRecommender(URM_train_init)
+    recommender_RP3beta.fit(alpha=alpha, factors=factors, regularization=regularization, iterations=iterations)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], verbose=False)
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_RP3beta)
