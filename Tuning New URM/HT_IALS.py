@@ -35,7 +35,6 @@ if __name__ == '__main__':
             recommender_IALS_list.append(ImplicitALSRecommender(URM_train_list[index]))
             recommender_IALS_list[index].fit(alpha=alpha, factors=factors, regularization=regularization, iterations=iterations)
 
-
         MAP_result = evaluator_validation.evaluateRecommender(recommender_IALS_list)
 
         return sum(MAP_result) / len(MAP_result)
