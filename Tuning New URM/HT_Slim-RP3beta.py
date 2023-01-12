@@ -65,7 +65,7 @@ if __name__ == "__main__":
     rec1.fit(topK=3890, alpha=0.0029228929900398564, l1_ratio=0.009916947930369228)
 
     rec2 = RP3betaRecommender(URM_train_init)
-    rec2.fit(alpha=0.6464070203480127, beta=0.23862952875217264, topK=67)
+    rec2.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
