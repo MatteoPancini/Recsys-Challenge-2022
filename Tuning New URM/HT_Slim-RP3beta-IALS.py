@@ -1,7 +1,7 @@
 if __name__ == "__main__":
 
-    from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-    from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
+    from Recommenders.Hybrid.Best_SlimRp3Beta import BestSlimRP3Beta
+    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -24,26 +24,28 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------------------------------------
     # Optuna hyperparameter model
 
-    recommender_Slim_list = []
-    recommender_RP3beta_list = []
+    recommender_SlimRP3beta_list = []
+    recommender_IALS_list = []
 
     for i in range(1):
-        recommender_Slim_list.append(SLIMElasticNetRecommender(URM_train_list[i]))
-        recommender_Slim_list[i].fit(topK=3310, alpha=0.0014579129528836648, l1_ratio=0.04059573169766696)
+        recommender_SlimRP3beta_list.append(BestSlimRP3Beta(URM_train_list[i]))
+        recommender_SlimRP3beta_list[i].fit()
 
-        recommender_RP3beta_list.append(RP3betaRecommender(URM_train=URM_train_list[i]))
-        recommender_RP3beta_list[i].fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
+        recommender_IALS_list.append(ImplicitALSRecommender(URM_train=URM_train_list[i]))
+        recommender_IALS_list[i].fit(factors=89, alpha=5, iterations=100, regularization=0.0001555120173392371)
+
+
 
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0.55, 0.59)
-        beta = trial.suggest_float("beta", 0.25, 0.29)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 0.2)
 
         for i in range(1):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
-                                                                                  Recommender_1=recommender_Slim_list[i],
-                                                                                  Recommender_2=recommender_RP3beta_list[i]))
+                                                                                  Recommender_1=recommender_SlimRP3beta_list[i],
+                                                                                  Recommender_2=recommender_IALS_list[i]))
             recommender_hybrid_list[i].fit(alpha=alpha, beta=beta)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_hybrid_list)
@@ -60,11 +62,11 @@ if __name__ == "__main__":
     alpha = study.best_params['alpha']
     beta = study.best_params['beta']
 
-    rec1 = SLIMElasticNetRecommender(URM_train_init)
-    rec1.fit(topK=3310, alpha=0.0014579129528836648, l1_ratio=0.04059573169766696)
+    rec1 = BestSlimRP3Beta(URM_train_init)
+    rec1.fit()
 
-    rec2 = RP3betaRecommender(URM_train_init)
-    rec2.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
+    rec2 = ImplicitALSRecommender(URM_train_init)
+    rec2.fit(factors=89, alpha=5, iterations=100, regularization=0.0001555120173392371)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
@@ -78,7 +80,7 @@ if __name__ == "__main__":
     resultParameters = result_dict.to_json(orient="records")
     parsed = json.loads(resultParameters)
 
-    with open("logs/" + "Slim-RP3beta" + "_logs_" + datetime.now().strftime(
+    with open("logs/" + "Slim-RP3beta-IALS" + "_logs_" + datetime.now().strftime(
             '%b%d_%H-%M-%S') + ".json", 'w') as json_file:
         json.dump(study.best_params, json_file, indent=4)
         json.dump(parsed, json_file, indent=4)
