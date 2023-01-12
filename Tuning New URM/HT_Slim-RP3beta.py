@@ -39,8 +39,8 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0, 3)
-        beta = trial.suggest_float("beta", 0, 3)
+        alpha = trial.suggest_float("alpha", 0, 1)
+        beta = trial.suggest_float("beta", 0, 1)
 
         for i in range(1):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
