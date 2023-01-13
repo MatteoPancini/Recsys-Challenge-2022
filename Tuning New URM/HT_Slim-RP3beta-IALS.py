@@ -1,7 +1,7 @@
 if __name__ == "__main__":
 
-    from Recommenders.Hybrid.Best_SlimRp3Beta import BestSlimRP3Beta
     from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
+    from Recommenders.Hybrid.Best_SlimRp3Beta import BestSlimRP3Beta
     from Recommenders.Hybrid.LinearHybridRecommender import LinearHybridTwoRecommenderTwoVariables
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         recommender_SlimRP3beta_list[i].fit()
 
         recommender_IALS_list.append(ImplicitALSRecommender(URM_train=URM_train_list[i]))
-        recommender_IALS_list[i].fit(factors=89, alpha=5, iterations=100, regularization=0.0001555120173392371)
+        recommender_IALS_list[i].fit(factors=97, alpha=6, iterations=59, regularization=0.004070427647981844)
 
 
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
         recommender_hybrid_list = []
         alpha = trial.suggest_float("alpha", 0, 1)
-        beta = trial.suggest_float("beta", 0, 0.2)
+        beta = trial.suggest_float("beta", 0, 0.1)
 
         for i in range(1):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=250)
+    study.optimize(objective, n_trials=100)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     rec1.fit()
 
     rec2 = ImplicitALSRecommender(URM_train_init)
-    rec2.fit(factors=89, alpha=5, iterations=100, regularization=0.0001555120173392371)
+    rec2.fit(factors=97, alpha=6, iterations=59, regularization=0.004070427647981844)
 
     recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
     recommender_hybrid.fit(alpha=alpha, beta=beta)
