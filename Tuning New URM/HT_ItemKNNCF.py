@@ -7,8 +7,6 @@ if __name__ == '__main__':
     from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
     import optuna as op
     import json
-    import csv
-    from optuna.samplers import RandomSampler
 
     # ---------------------------------------------------------------------------------------------------------
     # Loading URMs
@@ -27,7 +25,7 @@ if __name__ == '__main__':
         recommender_ItemKNNCF_list = []
 
         topK = trial.suggest_int("topK", 10, 500)
-        shrink = trial.suggest_int("shrink", 300, 1000)
+        shrink = trial.suggest_int("shrink", 100, 1000)
         similarity = trial.suggest_categorical("similarity", ["cosine"])
         feature_weighting = trial.suggest_categorical("feature_weighting", ["TF-IDF"])
 
@@ -41,7 +39,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=150)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
