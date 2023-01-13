@@ -27,9 +27,9 @@ if __name__ == '__main__':
 
         recommender_RpP3beta_list = []
 
-        topK = trial.suggest_int("topK", 10, 1000)
-        alpha = trial.suggest_float("alpha", 0.1, 0.9)
-        beta = trial.suggest_float("beta", 0.1, 0.9)
+        topK = trial.suggest_int("topK", 54, 54)
+        alpha = trial.suggest_float("alpha", 0.82, 0.83)
+        beta = trial.suggest_float("beta", 0.29, 0.30)
 
         for index in range(len(URM_train_list)):
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=250)
+    study.optimize(objective, n_trials=80)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP

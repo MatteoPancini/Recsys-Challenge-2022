@@ -22,7 +22,7 @@ class BestSlimRP3Beta(BaseRecommender):
         rec2.fit(alpha=0.8285172350759491, beta=0.292180138700761, topK=54)
 
         self.hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train=self.URM_train, Recommender_1=rec1, Recommender_2=rec2)
-        self.hybrid.fit(alpha=0.5738329337854908, beta=0.269980536299904)
+        self.hybrid.fit(alpha=0.5876407952106846, beta=0.2526497701799279)
 
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):

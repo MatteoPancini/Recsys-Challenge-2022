@@ -103,7 +103,7 @@ def createSlimBothAssumptionsURM():
     URM = sp.csr_matrix(URM)
     return URM
 
-def createProvaURM():
+def createProvaJustMalusURM():
     dataset = pd.read_csv(urmPath)
 
     dataset = dataset.drop(columns=['Impressions'])
@@ -117,15 +117,40 @@ def createProvaURM():
     for x in range(len(datasetCOO.data)):
         if datasetCOO.data[x] == 0:
             if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 1.0:
-                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.5
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.4
             else:
-                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.2
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.25
         elif datasetCOO.data[x] == 1:
-            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 1.2:
-                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.5
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 1.25:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.4
             elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 0.0:
-                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.0
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 0.8
 
+    URM = sp.csr_matrix(URM)
+    return URM
+
+def createProvaZero1URM():
+    dataset = pd.read_csv(urmPath)
+
+    dataset = dataset.drop(columns=['Impressions'])
+
+    datasetCOO = sp.coo_matrix((dataset["Data"].values, (dataset["UserID"].values, dataset["ItemID"].values)))
+    userIDS = dataset['UserID'].unique()
+    itemIDS = dataset['ItemID'].unique()
+
+    URM = np.zeros((len(userIDS), len(itemIDS)), dtype=float)
+
+    for x in range(len(datasetCOO.data)):
+        if datasetCOO.data[x] == 0:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 1.0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.4
+            else:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.0
+        elif datasetCOO.data[x] == 1:
+            if URM[datasetCOO.row[x]][datasetCOO.col[x]] == 1.0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 1.4
+            elif URM[datasetCOO.row[x]][datasetCOO.col[x]] == 0.0:
+                URM[datasetCOO.row[x]][datasetCOO.col[x]] = 0.8
 
     URM = sp.csr_matrix(URM)
     return URM
@@ -275,21 +300,19 @@ def createSmallICM():
 
 def createICMtypes():
 
-
     types = pd.read_csv(icmTypePath)
     types = types.drop(columns=['data'], axis=1)
     types = types.rename(columns={'feature_id': 'type'})
 
-    for i in range(23091):
-        types['type'][i] /= 7
-
     typesFiltered = types[types['item_id'] <= 24506]
     itemsID = typesFiltered['item_id'].to_numpy()
     typesArray = typesFiltered['type'].to_numpy()
-    ICM = np.zeros((24507, 1), dtype=float)
+    ICM = np.zeros((24507, 7), dtype=float)
 
     for x in range(len(itemsID)):
-        ICM[itemsID[x]][0] = typesArray[x]
+        ICM[itemsID[x]][typesArray[x]-1] = 1
+
+    ICM = sp.csr_matrix(ICM)
 
     return ICM
 
