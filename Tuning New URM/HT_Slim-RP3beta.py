@@ -37,8 +37,8 @@ if __name__ == "__main__":
     def objective(trial):
 
         recommender_hybrid_list = []
-        alpha = trial.suggest_float("alpha", 0.55, 0.59)
-        beta = trial.suggest_float("beta", 0.25, 0.29)
+        alpha = trial.suggest_float("alpha", 0.5, 1)
+        beta = trial.suggest_float("beta", 0.2, 0.7)
 
         for i in range(1):
             recommender_hybrid_list.append(LinearHybridTwoRecommenderTwoVariables(URM_train_list[i],
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=250)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
