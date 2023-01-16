@@ -1,4 +1,0 @@
-recommender,factors,alpha,regularization,iterations,MAP
-ImplicitALSRecommender,424,20,0.001,55,0.011897248618454495
-ImplicitALSRecommender,436,10,0.001,32,0.012611130923491478
-ImplicitALSRecommender,257,34,0.001,99,0.010419316353190669

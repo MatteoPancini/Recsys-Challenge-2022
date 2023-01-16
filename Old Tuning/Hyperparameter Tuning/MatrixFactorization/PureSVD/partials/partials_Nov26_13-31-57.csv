@@ -1,2 +1,0 @@
-recommender,topK,num_factors,MAP
-PureSVDItemRecommender,30,201,0.009582801078736226

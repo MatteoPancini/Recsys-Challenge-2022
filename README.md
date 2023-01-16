@@ -1,1 +1,1 @@
-# recsys-challenge-2022-Pancini-Vitali
+# Recsys Challenge 2022

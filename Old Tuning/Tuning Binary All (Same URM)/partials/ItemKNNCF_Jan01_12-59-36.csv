@@ -1,2 +1,0 @@
-recommender,shrink,topk,similarity,normalization,MAP
-ItemKNNCFRecommender,40,1818,cosine,bm25,0.016679498910520132
