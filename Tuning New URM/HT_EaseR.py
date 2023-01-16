@@ -4,7 +4,7 @@ if __name__ == '__main__':
     from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
     from datetime import datetime
     from Utils.recsys2022DataReader import *
-    from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
+    from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
     import optuna as op
     import json
 
@@ -25,15 +25,13 @@ if __name__ == '__main__':
 
         recommender_IALS_list = []
 
-        factors = trial.suggest_int("factors", 97, 97)
-        alpha = trial.suggest_int("alpha", 6, 6)
-        iterations = trial.suggest_int("iterations", 40, 70)
-        regularization = trial.suggest_float("regularization", 0.0039, 0.0041)
+        topK = trial.suggest_int("topK", 1000, 5000)
+        l2_norm = trial.suggest_float("l2_norm", 1e-5, 1e-1)
 
         for index in range(len(URM_train_list)):
 
-            recommender_IALS_list.append(ImplicitALSRecommender(URM_train_list[index]))
-            recommender_IALS_list[index].fit(alpha=alpha, factors=factors, regularization=regularization, iterations=iterations)
+            recommender_IALS_list.append(EASE_R_Recommender(URM_train_list[index]))
+            recommender_IALS_list[index].fit(topK=topK, l2_norm=l2_norm)
 
         MAP_result = evaluator_validation.evaluateRecommender(recommender_IALS_list)
 
@@ -41,18 +39,16 @@ if __name__ == '__main__':
 
 
     study = op.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=80)
 
     # ---------------------------------------------------------------------------------------------------------
     # Fitting and testing to get local MAP
 
-    factors = study.best_params['factors']
-    alpha = study.best_params['alpha']
-    regularization = study.best_params['regularization']
-    iterations = study.best_params['iterations']
+    topK = study.best_params['topK']
+    l2_norm = study.best_params['l2_norm']
 
-    recommender_RP3beta = ImplicitALSRecommender(URM_train_init)
-    recommender_RP3beta.fit(alpha=alpha, factors=factors, regularization=regularization, iterations=iterations)
+    recommender_RP3beta = EASE_R_Recommender(URM_train_init)
+    recommender_RP3beta.fit(topK=topK, l2_norm=l2_norm)
 
     evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[10], verbose=False)
     result_dict, _ = evaluator_test.evaluateRecommender(recommender_RP3beta)
