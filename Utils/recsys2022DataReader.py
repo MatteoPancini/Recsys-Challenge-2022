@@ -5,18 +5,18 @@ import numpy as np
 # path are:
 # - ../../Input/ if run from notebooks and main Hybrid .py
 # - ../../../Input/ if run from python file
-'''
-urmPath = "../Input/interactions_and_impressions.csv"
+
+urmPath = "../../Input/interactions_and_impressions.csv"
 icmTypePath = "../../Input/data_ICM_type.csv"
 icmLenghtPath = "../../Input/data_ICM_length.csv"
 '''
 urmPath = "../Input/interactions_and_impressions.csv"
 icmTypePath = "../Input/data_ICM_type.csv"
 icmLenghtPath = "../Input/data_ICM_length.csv"
-
+'''
 targetUserPath = "../../../Input/data_target_users_test.csv"
 
-sourceDataset = '../../Dataset/Our/'
+sourceDataset = '../Dataset/'
 finalSourceDataset = '../Dataset/Final'
 
 def createURM():
@@ -314,18 +314,18 @@ def load_FinalURMTest():
 def load_3K_BinURMTrain():
     URM_train_list = []
 
-    URM_train_list.append(sp.load_npz(finalSourceDataset + 'URM_train0.npz'))
-    URM_train_list.append(sp.load_npz(finalSourceDataset + 'URM_train1.npz'))
-    URM_train_list.append(sp.load_npz(finalSourceDataset + 'URM_train2.npz'))
+    URM_train_list.append(sp.load_npz(sourceDataset + 'URM_train0.npz'))
+    URM_train_list.append(sp.load_npz(sourceDataset + 'URM_train1.npz'))
+    URM_train_list.append(sp.load_npz(sourceDataset + 'URM_train2.npz'))
 
     return URM_train_list
 
 def load_3K_BinURMValid():
     URM_val_list = []
 
-    URM_val_list.append(sp.load_npz(finalSourceDataset + 'URM_val0.npz'))
-    URM_val_list.append(sp.load_npz(finalSourceDataset + 'URM_val1.npz'))
-    URM_val_list.append(sp.load_npz(finalSourceDataset + 'URM_val2.npz'))
+    URM_val_list.append(sp.load_npz(sourceDataset + 'URM_val0.npz'))
+    URM_val_list.append(sp.load_npz(sourceDataset + 'URM_val1.npz'))
+    URM_val_list.append(sp.load_npz(sourceDataset + 'URM_val2.npz'))
 
     return URM_val_list
 

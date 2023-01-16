@@ -1,0 +1,40 @@
+{
+    rec1 = BestSlimRP3Beta(URM_train_init)
+    rec1.fit()
+
+    rec2 = ImplicitALSRecommender(URM_train_init)
+    rec2.fit(factors=97, alpha=6, iterations=59, regularization=0.004070427647981844)
+
+    recommender_hybrid = LinearHybridTwoRecommenderTwoVariables(URM_train_init, Recommender_1=rec1, Recommender_2=rec2)
+    recommender_hybrid.fit(alpha=0.7281951073280903, beta=0.03967805621770254)
+}[
+    {
+        "PRECISION": 0.0569821148,
+        "PRECISION_RECALL_MIN_DEN": 0.0939986496,
+        "RECALL": 0.0877638345,
+        "MAP": 0.0285272839,
+        "MAP_MIN_DEN": 0.0461840339,
+        "MRR": 0.1856827378,
+        "NDCG": 0.0925987097,
+        "F1": 0.0690999495,
+        "HIT_RATE": 0.3659345519,
+        "ARHR_ALL_HITS": 0.2281426068,
+        "NOVELTY": 0.004360764,
+        "AVERAGE_POPULARITY": 0.187875314,
+        "DIVERSITY_MEAN_INTER_LIST": 0.9495044483,
+        "DIVERSITY_HERFINDAHL": 0.9949481121,
+        "COVERAGE_ITEM": 0.1648916636,
+        "COVERAGE_ITEM_HIT": 0.0636552822,
+        "ITEMS_IN_GT": 0.9926551598,
+        "COVERAGE_USER": 0.977779913,
+        "COVERAGE_USER_HIT": 0.3578034543,
+        "USERS_IN_GT": 0.977779913,
+        "DIVERSITY_GINI": 0.0235491124,
+        "SHANNON_ENTROPY": 9.1986521172,
+        "RATIO_DIVERSITY_HERFINDAHL": 0.9952758996,
+        "RATIO_DIVERSITY_GINI": 0.0462764303,
+        "RATIO_SHANNON_ENTROPY": 0.6816088292,
+        "RATIO_AVERAGE_POPULARITY": 3.7170271551,
+        "RATIO_NOVELTY": 0.249465771
+    }
+]
